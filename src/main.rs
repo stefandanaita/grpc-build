@@ -9,6 +9,7 @@ mod tonic_builder;
 #[derive(structopt::StructOpt)]
 pub enum Command {
     Build {
+        #[structopt(long)]
         in_dir: Option<String>,
         out_dir: Option<String>,
 
