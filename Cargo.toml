@@ -1,0 +1,16 @@
+[package]
+name = "protos-rs-compiler"
+version = "1.0.0"
+authors = ["Stefan Adrian Danaita <me@dsa.io>"]
+edition = "2018"
+
+[dependencies]
+tokio = { version = "0.2", features = ["macros"] }
+tonic = "0.2"
+prost = "0.6"
+petgraph = "0.5.0"
+anyhow = "1.0.28"
+tonic-build = "0.2"
+async-std = { version = "1.4.0", features = ["attributes"] }
+structopt = { version ="0.3.2", features = ["paw"] }
+paw = "1.0.0"
