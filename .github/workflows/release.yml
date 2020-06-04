@@ -44,7 +44,7 @@ jobs:
         run: cargo install -f --path .
       
       - name: Copy the binary
-        run: cp ~/.cargo/bin/protos-rs-compiler ./protos-rs-compiler
+        run: cp ~/.cargo/bin/grpc-build ./grpc-build
 
       - name: Create Release
         id: create_release
@@ -63,6 +63,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./protos-rs-compiler
-          asset_name: protos-rs-compiler
+          asset_path: ./grpc-build
+          asset_name: grpc-build
           asset_content_type: application/octet-stream
