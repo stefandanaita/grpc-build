@@ -1,5 +1,5 @@
 [package]
-name = "protos-rs-compiler"
+name = "grpc-build"
 version = "1.0.0"
 authors = ["Stefan Adrian Danaita <me@dsa.io>"]
 edition = "2018"

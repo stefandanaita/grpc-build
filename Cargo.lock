@@ -356,6 +356,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "grpc-build"
+version = "1.0.0"
+dependencies = [
+ "anyhow",
+ "async-std",
+ "paw",
+ "petgraph",
+ "prost",
+ "structopt",
+ "tokio",
+ "tonic",
+ "tonic-build",
+]
+
+[[package]]
 name = "h2"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -800,21 +815,6 @@ checksum = "1834f67c0697c001304b75be76f67add9c89742eda3a085ad8ee0bb38c3417aa"
 dependencies = [
  "bytes",
  "prost",
-]
-
-[[package]]
-name = "protos-rs-compiler"
-version = "1.0.0"
-dependencies = [
- "anyhow",
- "async-std",
- "paw",
- "petgraph",
- "prost",
- "structopt",
- "tokio",
- "tonic",
- "tonic-build",
 ]
 
 [[package]]
