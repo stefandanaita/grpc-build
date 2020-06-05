@@ -67,21 +67,29 @@ pub fn display(
     file: &mut File,
     node: &NodeIndex,
 ) -> Result<(), anyhow::Error> {
-    if !graph[*node].is_root && !graph[*node].is_leaf {
+    let children = graph.neighbors_directed(*node, Direction::Outgoing);
+
+    if graph[*node].is_root {
+        for child in children {
+            display(graph, file, &child)?;
+        }
+
+        return Ok(())
+    }
+
+    if !graph[*node].is_leaf {
         file.write_all(format!("pub mod {} {{\n", graph[*node].weight).as_bytes())?;
     }
 
     if graph[*node].is_leaf {
         file.write_all(format!("include!(\"{}\");", graph[*node].weight).as_bytes())?;
     } else {
-        let children = graph.neighbors_directed(*node, Direction::Outgoing);
-
         for child in children {
             display(graph, file, &child)?;
         }
     }
 
-    if !graph[*node].is_root && !graph[*node].is_leaf {
+    if !graph[*node].is_leaf {
         file.write_all(b"}\n")?;
     }
 
