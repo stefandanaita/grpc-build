@@ -1,4 +1,5 @@
 /target
+.idea
 /protos
 /protogen
 /src/protos
