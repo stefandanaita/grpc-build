@@ -11,7 +11,6 @@ pub fn compile(
     let mut protos = vec![];
     get_protos(protos.as_mut(), Path::new(input_dir))?;
 
-    fs::create_dir_all(output_dir)?;
     tonic_build::configure()
         .out_dir(output_dir)
         .build_client(server)

@@ -14,6 +14,9 @@ pub enum Command {
 
         #[structopt(short = "server", long = "build_server")]
         build_server: bool,
+
+        #[structopt(short = "force", long = "force")]
+        force: bool,
     },
 }
 
@@ -27,8 +30,9 @@ async fn main() -> Result<(), anyhow::Error> {
             out_dir,
             build_client,
             build_server,
+            force,
         } => {
-            build(in_dir, out_dir, build_client, build_server)?;
+            build(in_dir, out_dir, build_client, build_server, force)?;
         }
     }
 
