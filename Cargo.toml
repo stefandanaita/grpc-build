@@ -4,6 +4,14 @@ version = "1.0.0"
 authors = ["Stefan Adrian Danaita <me@dsa.io>"]
 edition = "2018"
 
+[[bin]]
+path = "src/main.rs"
+name = "grpc_build"
+
+[lib]
+path = "src/lib.rs"
+name = "grpc_build"
+
 [dependencies]
 tokio = { version = "0.2", features = ["macros"] }
 tonic = "0.2"
