@@ -1,3 +1,5 @@
 /target
 /protos
-/compiled
+/protogen
+/src/protos
+/src/protogen
