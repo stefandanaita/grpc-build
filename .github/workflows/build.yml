@@ -1,7 +1,6 @@
 name: Build and Check
 
-on:
-  [push, pull_request]
+on: push
 
 env:
   CARGO_TERM_COLOR: always
