@@ -29,7 +29,7 @@ pub fn generate(output_dir: &str) -> Result<Graph<ProtoGraphNode, ()>, anyhow::E
     let mut prev_node: NodeIndex;
 
     for name in file_names.iter() {
-        let tokens = name.split(".");
+        let tokens = name.split('.');
 
         prev_node = root_node;
         for token in tokens {
@@ -48,11 +48,14 @@ pub fn generate(output_dir: &str) -> Result<Graph<ProtoGraphNode, ()>, anyhow::E
                 .neighbors_directed(prev_node, Direction::Outgoing)
                 .find(|&x| proto_graph[x].weight == token);
 
-            if existing_node.is_some() {
-                curr_node = existing_node.unwrap();
-            } else {
-                curr_node = proto_graph.add_node(node);
-                proto_graph.add_edge(prev_node, curr_node, ());
+            match existing_node {
+                None => {
+                    curr_node = proto_graph.add_node(node);
+                    proto_graph.add_edge(prev_node, curr_node, ());
+                }
+                Some(node) => {
+                    curr_node = node;
+                }
             }
 
             prev_node = curr_node;
