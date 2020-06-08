@@ -87,7 +87,7 @@ pub fn build(
         }
     };
 
-    match display(&graph, &mut proto_lib, &NodeIndex::from(0)) {
+    match display(&graph, &mut proto_lib, NodeIndex::from(0)) {
         Ok(_) => {}
         Err(_) => {
             return Err(BuildError::Error(String::from(
