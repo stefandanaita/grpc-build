@@ -74,7 +74,7 @@ pub fn display(
             display(graph, file, &child)?;
         }
 
-        return Ok(())
+        return Ok(());
     }
 
     if !graph[*node].is_leaf {
