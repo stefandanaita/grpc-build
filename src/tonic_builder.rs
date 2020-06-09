@@ -28,11 +28,9 @@ fn get_protos(protos: &mut Vec<PathBuf>, dir: &Path) -> io::Result<()> {
 
             if path.is_dir() {
                 get_protos(protos, &path)?;
-            } else {
-                if let Some(extension) = path.extension() {
-                    if extension == OsStr::new("proto") {
-                        protos.push(path.as_path().to_owned());
-                    }
+            } else if let Some(extension) = path.extension() {
+                if extension == OsStr::new("proto") {
+                    protos.push(path.as_path().to_owned());
                 }
             }
         }
