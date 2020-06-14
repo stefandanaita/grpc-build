@@ -4,10 +4,10 @@ use grpc_build::build;
 pub enum Command {
     Build {
         #[structopt(long)]
-        in_dir: Option<String>,
+        in_dir: String,
 
         #[structopt(long)]
-        out_dir: Option<String>,
+        out_dir: String,
 
         #[structopt(short = "client", long = "build_client")]
         build_client: bool,
@@ -32,7 +32,7 @@ async fn main() -> Result<(), anyhow::Error> {
             build_server,
             force,
         } => {
-            build(in_dir, out_dir, build_client, build_server, force)?;
+            build(&in_dir, &out_dir, build_client, build_server, force)?;
         }
     }
 
