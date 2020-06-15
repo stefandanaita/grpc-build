@@ -49,3 +49,7 @@ fn main() {
     .unwrap();
 }
 ```
+
+
+## License
+This project is licensed under the [MIT license](https://github.com/stefandanaita/grpc-build/blob/master/LICENSE).
