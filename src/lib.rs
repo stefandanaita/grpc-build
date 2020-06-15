@@ -27,7 +27,9 @@ pub fn build(
 ) -> Result<(), BuildError> {
     if Path::new(out_dir).exists() {
         if !force {
-            return Err(BuildError::OutputDirectoryExistsError(String::from(out_dir)));
+            return Err(BuildError::OutputDirectoryExistsError(String::from(
+                out_dir,
+            )));
         }
 
         match fs::remove_dir_all(out_dir) {
