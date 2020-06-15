@@ -10,6 +10,7 @@ directory and generating the `mod.rs` file according to the protobuf directory s
 It comes both as a library that you can use inside your project and as a binary
 that can be used in your CI pipelines.
 
+[Documentation](https://docs.rs/grpc-build) - [Crates.io](https://crates.io/crates/grpc-build)
 
 ## Getting started
 
