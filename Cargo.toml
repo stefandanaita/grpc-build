@@ -6,6 +6,7 @@ license = "MIT"
 edition = "2018"
 
 readme = "README.md"
+description = "gPRC compilation made easy"
 homepage = "https://github.com/stefandanaita/grpc-build"
 repository = "https://github.com/stefandanaita/grpc-build"
 
