@@ -29,6 +29,7 @@ grpc-build build -c -s --in-dir="<protobuf directory>" --out-dir="<codegen>" -f
 ```
 
 ### Using it as a library
+
 The most convenient way of using `grpc_build` as a library is by taking advantage of Rust's `build.rs` file. Don't forget to add `grpc_build` to the [build-dependencies](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#build-dependencies) list.
 
 ```
