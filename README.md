@@ -29,7 +29,8 @@ grpc-build build -c -s --in-dir="<protobuf directory>" --out-dir="<codegen>" -f
 ```
 
 ### Using it as a library
-The most convenient way of using `grpc_build` as a library is by taking advantage of Rust's `build.rs` file.
+
+The most convenient way of using `grpc_build` as a library is by taking advantage of Rust's `build.rs` file. Don't forget to add `grpc_build` to the [build-dependencies](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#build-dependencies) list.
 
 ```
 // build.rs
@@ -37,27 +38,19 @@ use grpc_build::build;
 
 fn main() {
     build(
-        "protos",
-        "src/protogen",
-        true,
-        true,
-        true,
+        "protos",       // protobuf files input dir
+        "src/protogen", // output directory
+        true,           // --build_server=true
+        true,           // --build_client=true
+        true,           // --force
     )
     .unwrap();
 }
 ```
 
-## Continuous Integration Examples
+## Known issues
 
-### GitHub Actions
-```
-SoonTM
-```
-
-### CircleCI
-```
-SoonTM
-```
+- The generated `mod.rs` file is not formatted properly. Until this is fixed, manually running `cargo fmt` should fix it.
 
 ## License
 This project is licensed under the [MIT license](https://github.com/stefandanaita/grpc-build/blob/master/LICENSE).
