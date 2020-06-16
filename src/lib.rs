@@ -19,29 +19,20 @@ pub enum BuildError {
 }
 
 pub fn build(
-    in_dir: Option<String>,
-    out_dir: Option<String>,
+    in_dir: &str,
+    out_dir: &str,
     build_server: bool,
     build_client: bool,
     force: bool,
 ) -> Result<(), BuildError> {
-    let input_dir: String = match in_dir {
-        None => String::from("protos"),
-        Some(dir) => dir,
-    };
-    let output_dir: String = match out_dir {
-        None => String::from("src/protogen"),
-        Some(dir) => dir,
-    };
-
-    if Path::new(&output_dir).exists() {
+    if Path::new(out_dir).exists() {
         if !force {
             return Err(BuildError::OutputDirectoryExistsError(String::from(
-                &output_dir,
+                out_dir,
             )));
         }
 
-        match fs::remove_dir_all(&output_dir) {
+        match fs::remove_dir_all(out_dir) {
             Ok(_) => {}
             Err(_) => {
                 return Err(BuildError::Error(String::from(
@@ -51,7 +42,7 @@ pub fn build(
         };
     }
 
-    match fs::create_dir_all(&output_dir) {
+    match fs::create_dir_all(out_dir) {
         Ok(_) => {}
         Err(_) => {
             return Err(BuildError::Error(String::from(
@@ -60,7 +51,7 @@ pub fn build(
         }
     };
 
-    match compile(&input_dir, &output_dir, build_server, build_client) {
+    match compile(in_dir, out_dir, build_server, build_client) {
         Ok(_) => {}
         Err(_) => {
             return Err(BuildError::Error(String::from(
@@ -69,7 +60,7 @@ pub fn build(
         }
     };
 
-    let graph = match generate(&output_dir) {
+    let graph = match generate(out_dir) {
         Ok(graph) => graph,
         Err(_) => {
             return Err(BuildError::Error(String::from(
@@ -78,7 +69,7 @@ pub fn build(
         }
     };
 
-    let mut proto_lib = match File::create(format!("{}/mod.rs", output_dir)) {
+    let mut proto_lib = match File::create(format!("{}/mod.rs", out_dir)) {
         Ok(file) => file,
         Err(_) => {
             return Err(BuildError::Error(String::from(

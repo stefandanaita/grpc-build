@@ -1,8 +1,16 @@
 [package]
 name = "grpc-build"
-version = "1.0.0"
+version = "0.0.1"
 authors = ["Stefan Adrian Danaita <me@dsa.io>"]
+license = "MIT"
 edition = "2018"
+
+readme = "README.md"
+homepage = "https://github.com/stefandanaita/grpc-build"
+repository = "https://github.com/stefandanaita/grpc-build"
+
+keywords = ["grpc", "tonic", "proto"]
+categories = ["development-tools"]
 
 [[bin]]
 path = "src/main.rs"
