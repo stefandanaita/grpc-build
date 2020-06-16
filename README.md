@@ -47,18 +47,6 @@ fn main() {
 }
 ```
 
-## Continuous Integration Examples
-
-### GitHub Actions
-```
-SoonTM
-```
-
-### CircleCI
-```
-SoonTM
-```
-
 ## Known issues
 
 - The generated `mod.rs` file is not formatted properly. Until this is fixed, manually running `cargo fmt` should fix it.
