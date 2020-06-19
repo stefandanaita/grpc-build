@@ -15,7 +15,7 @@ pub fn compile(
         .out_dir(output_dir)
         .build_client(server)
         .build_server(client)
-        .compile(protos.as_slice(), &[PathBuf::from(".")])?;
+        .compile(protos.as_slice(), &[PathBuf::from(input_dir)])?;
 
     Ok(())
 }
