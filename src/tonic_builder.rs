@@ -11,11 +11,16 @@ pub fn compile(
     let mut protos = vec![];
     get_protos(protos.as_mut(), Path::new(input_dir))?;
 
+    let compile_includes: PathBuf = match Path::new(input_dir).parent() {
+        None => PathBuf::from("."),
+        Some(parent) => parent.to_path_buf(),
+    };
+
     tonic_build::configure()
         .out_dir(output_dir)
         .build_client(server)
         .build_server(client)
-        .compile(protos.as_slice(), &[PathBuf::from(".")])?;
+        .compile(protos.as_slice(), &[compile_includes])?;
 
     Ok(())
 }
