@@ -102,7 +102,7 @@ pub fn build(
         .spawn()
     {
         Ok(_) => println!("Successfully formatted the mod.rs file using Rustfmt"),
-        Err(e) => eprintln!("Failed to populate the mod.rs file: {:?}", e)
+        Err(e) => eprintln!("Failed to populate the mod.rs file: {:?}", e),
     }
 
     Ok(())
