@@ -101,10 +101,8 @@ pub fn build(
         .arg(format!("{}/mod.rs", out_dir))
         .spawn()
     {
-        Ok(_) => {}
-        Err(e) => {
-            return Err(BuildError::FormattingError(format!("{:?}", e)));
-        }
+        Ok(_) => println!("Successfully formatted the mod.rs file using Rustfmt"),
+        Err(e) => eprintln!("Failed to populate the mod.rs file: {:?}", e)
     }
 
     Ok(())
