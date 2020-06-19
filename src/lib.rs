@@ -38,7 +38,7 @@ pub fn build(
                 eprintln!("Failed to remove the output directory: {:?}", e);
                 return Err(BuildError::Error(String::from(
                     "Could not remove the output directory",
-                )))
+                )));
             }
         };
     }
@@ -49,7 +49,7 @@ pub fn build(
             eprintln!("Failed to create the output directory: {:?}", e);
             return Err(BuildError::Error(String::from(
                 "Could not create the output directory",
-            )))
+            )));
         }
     };
 
@@ -59,7 +59,7 @@ pub fn build(
             eprintln!("Failed to compile the protos: {:?}", e);
             return Err(BuildError::Error(String::from(
                 "Failed the compile the protos",
-            )))
+            )));
         }
     };
 
@@ -69,7 +69,7 @@ pub fn build(
             eprintln!("Failed to generate the graph: {:?}", e);
             return Err(BuildError::Error(String::from(
                 "Failed to generate the graph",
-            )))
+            )));
         }
     };
 
@@ -79,7 +79,7 @@ pub fn build(
             eprintln!("Failed to create the mod.rs file: {:?}", e);
             return Err(BuildError::Error(String::from(
                 "Failed to create the mod.rs file",
-            )))
+            )));
         }
     };
 
@@ -89,7 +89,7 @@ pub fn build(
             eprintln!("Failed to populate the mod.rs file: {:?}", e);
             return Err(BuildError::Error(String::from(
                 "Failed to populate the mod.rs file",
-            )))
+            )));
         }
     };
 
