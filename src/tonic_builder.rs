@@ -18,8 +18,8 @@ pub fn compile(
 
     tonic_build::configure()
         .out_dir(output_dir)
-        .build_client(server)
-        .build_server(client)
+        .build_client(client)
+        .build_server(server)
         .compile(protos.as_slice(), &[compile_includes])?;
 
     Ok(())
