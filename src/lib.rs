@@ -34,56 +34,62 @@ pub fn build(
 
         match fs::remove_dir_all(out_dir) {
             Ok(_) => {}
-            Err(_) => {
+            Err(e) => {
+                eprintln!("Failed to remove the output directory: {:?}", e);
                 return Err(BuildError::Error(String::from(
                     "Could not remove the output directory",
-                )))
+                )));
             }
         };
     }
 
     match fs::create_dir_all(out_dir) {
         Ok(_) => {}
-        Err(_) => {
+        Err(e) => {
+            eprintln!("Failed to create the output directory: {:?}", e);
             return Err(BuildError::Error(String::from(
                 "Could not create the output directory",
-            )))
+            )));
         }
     };
 
     match compile(in_dir, out_dir, build_server, build_client) {
         Ok(_) => {}
-        Err(_) => {
+        Err(e) => {
+            eprintln!("Failed to compile the protos: {:?}", e);
             return Err(BuildError::Error(String::from(
                 "Failed the compile the protos",
-            )))
+            )));
         }
     };
 
     let graph = match generate(out_dir) {
         Ok(graph) => graph,
-        Err(_) => {
+        Err(e) => {
+            eprintln!("Failed to generate the graph: {:?}", e);
             return Err(BuildError::Error(String::from(
                 "Failed to generate the graph",
-            )))
+            )));
         }
     };
 
     let mut proto_lib = match File::create(format!("{}/mod.rs", out_dir)) {
         Ok(file) => file,
-        Err(_) => {
+        Err(e) => {
+            eprintln!("Failed to create the mod.rs file: {:?}", e);
             return Err(BuildError::Error(String::from(
                 "Failed to create the mod.rs file",
-            )))
+            )));
         }
     };
 
     match display(&graph, &mut proto_lib, NodeIndex::from(0)) {
         Ok(_) => {}
-        Err(_) => {
+        Err(e) => {
+            eprintln!("Failed to populate the mod.rs file: {:?}", e);
             return Err(BuildError::Error(String::from(
                 "Failed to populate the mod.rs file",
-            )))
+            )));
         }
     };
 

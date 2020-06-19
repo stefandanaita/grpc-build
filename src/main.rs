@@ -20,8 +20,7 @@ pub enum Command {
     },
 }
 
-#[async_std::main]
-async fn main() -> Result<(), anyhow::Error> {
+fn main() -> Result<(), anyhow::Error> {
     let command = <Command as paw::ParseArgs>::parse_args()?;
 
     match command {
