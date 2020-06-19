@@ -48,9 +48,5 @@ fn main() {
 }
 ```
 
-## Known issues
-
-- The generated `mod.rs` file is not formatted properly. Until this is fixed, manually running `cargo fmt` should fix it.
-
 ## License
 This project is licensed under the [MIT license](https://github.com/stefandanaita/grpc-build/blob/master/LICENSE).
