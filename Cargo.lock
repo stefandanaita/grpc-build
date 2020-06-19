@@ -99,7 +99,7 @@ dependencies = [
 
 [[package]]
 name = "grpc-build"
-version = "0.0.4-alpha.0"
+version = "0.0.4"
 dependencies = [
  "anyhow",
  "paw",
