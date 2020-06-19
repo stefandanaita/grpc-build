@@ -31,7 +31,7 @@ fn main() -> Result<(), anyhow::Error> {
             build_server,
             force,
         } => {
-            build(&in_dir, &out_dir, build_client, build_server, force)?;
+            build(&in_dir, &out_dir, build_server, build_client, force)?;
         }
     }
 
