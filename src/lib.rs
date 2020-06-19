@@ -4,6 +4,7 @@ use petgraph::graph::NodeIndex;
 use std::fs;
 use std::fs::File;
 use std::path::Path;
+use std::process::Command;
 use thiserror::Error;
 
 mod graph_layout;
@@ -13,6 +14,9 @@ mod tonic_builder;
 pub enum BuildError {
     #[error("The output directory already exists: {0}")]
     OutputDirectoryExistsError(String),
+
+    #[error("Formatting the generated mod.rs file failed: {0}")]
+    FormattingError(String),
 
     #[error("{0}")]
     Error(String),
@@ -92,6 +96,16 @@ pub fn build(
             )));
         }
     };
+
+    match Command::new("rustfmt")
+        .arg(format!("{}/mod.rs", out_dir))
+        .spawn()
+    {
+        Ok(_) => {}
+        Err(e) => {
+            return Err(BuildError::FormattingError(format!("{:?}", e)));
+        }
+    }
 
     Ok(())
 }
