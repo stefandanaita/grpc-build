@@ -22,10 +22,10 @@ path = "src/lib.rs"
 name = "grpc_build"
 
 [dependencies]
-prost = "0.6"
-petgraph = "0.5.0"
-anyhow = "1.0.28"
-tonic-build = "0.2"
-structopt = { version ="0.3.2", features = ["paw"] }
-paw = "1.0.0"
-thiserror = "1.0.19"
+prost = "0.7"
+petgraph = "0.5"
+anyhow = "1"
+tonic-build = "0.3"
+structopt = { version ="0.3", features = ["paw"] }
+paw = "1"
+thiserror = "1"
