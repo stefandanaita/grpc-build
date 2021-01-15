@@ -25,7 +25,7 @@ name = "grpc_build"
 prost = "0.7"
 petgraph = "0.5"
 anyhow = "1"
-tonic-build = "0.3"
+tonic-build = "0.4"
 structopt = { version ="0.3", features = ["paw"] }
 paw = "1"
 thiserror = "1"
