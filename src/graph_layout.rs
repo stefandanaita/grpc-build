@@ -33,9 +33,9 @@ pub fn generate(output_dir: &str) -> Result<Graph<ProtoGraphNode, ()>, anyhow::E
     let mut prev_node: NodeIndex;
 
     for filename_with_extension in file_names.iter() {
-        let filename = String::from(filename_with_extension.replace(".rs", ""));
+        let filename = filename_with_extension.replace(".rs", "");
 
-        let tokens = filename.split(".");
+        let tokens = filename.split('.');
         let tokens_no = tokens.clone().count();
 
         prev_node = root_node;
