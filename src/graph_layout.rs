@@ -45,7 +45,7 @@ pub fn generate(output_dir: &str) -> Result<Graph<ProtoGraphNode, ()>, anyhow::E
                 is_leaf: false,
                 weight: token.to_string(),
                 filename: String::from(filename_with_extension),
-                leaf_token: None
+                leaf_token: None,
             };
 
             if i == tokens_no - 1 {
@@ -60,7 +60,8 @@ pub fn generate(output_dir: &str) -> Result<Graph<ProtoGraphNode, ()>, anyhow::E
                 fs::rename(
                     format!("{}/{}", output_dir, filename_with_extension),
                     format!("{}/{}/{}", output_dir, fname, filename_with_extension),
-                ).unwrap();
+                )
+                .unwrap();
             }
 
             let existing_node = proto_graph
@@ -108,7 +109,7 @@ pub fn display(
 
         match &graph[node].leaf_token {
             None => (),
-            Some(token) => file.write_all(format!("pub mod {};\n", &token).as_bytes())?
+            Some(token) => file.write_all(format!("pub mod {};\n", &token).as_bytes())?,
         }
     } else {
         for child in children {
