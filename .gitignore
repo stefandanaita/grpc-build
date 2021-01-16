@@ -2,6 +2,6 @@
 .idea
 /protos
 /protogen
-/protos
+/src/protos
 /src/protogen
 .DS_Store
