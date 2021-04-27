@@ -25,6 +25,7 @@ pub fn compile(
         .out_dir(output_dir)
         .build_client(client)
         .build_server(server)
+        .format(false)
         .compile(protos.as_slice(), includes.as_slice())?;
 
     Ok(())
