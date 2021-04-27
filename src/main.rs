@@ -35,7 +35,14 @@ fn main() -> Result<(), anyhow::Error> {
             build_server,
             force,
         } => {
-            build(&in_dir, &out_dir, includes.as_slice(), build_server, build_client, force)?;
+            build(
+                &in_dir,
+                &out_dir,
+                includes.as_slice(),
+                build_server,
+                build_client,
+                force,
+            )?;
         }
     }
 
