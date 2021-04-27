@@ -9,6 +9,9 @@ pub enum Command {
         #[structopt(long)]
         out_dir: String,
 
+        #[structopt(short = "I", long = "include")]
+        includes: Vec<String>,
+
         #[structopt(short = "client", long = "build_client")]
         build_client: bool,
 
@@ -27,11 +30,12 @@ fn main() -> Result<(), anyhow::Error> {
         Command::Build {
             in_dir,
             out_dir,
+            includes,
             build_client,
             build_server,
             force,
         } => {
-            build(&in_dir, &out_dir, build_server, build_client, force)?;
+            build(&in_dir, &out_dir, includes.as_slice(), build_server, build_client, force)?;
         }
     }
 
