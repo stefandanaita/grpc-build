@@ -44,7 +44,7 @@ jobs:
         run: cargo install -f --path .
       
       - name: Copy the binary
-        run: cp ~/.cargo/bin/grpc-build ./grpc-build
+        run: cp ~/work/grpc-build/grpc-build ./grpc-build
 
       - name: Create Release
         id: create_release
