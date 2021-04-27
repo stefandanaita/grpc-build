@@ -25,6 +25,7 @@ pub enum BuildError {
 pub fn build(
     in_dir: &str,
     out_dir: &str,
+    includes: &[String],
     build_server: bool,
     build_client: bool,
     force: bool,
@@ -57,7 +58,7 @@ pub fn build(
         }
     };
 
-    match compile(in_dir, out_dir, build_server, build_client) {
+    match compile(in_dir, out_dir, includes, build_server, build_client) {
         Ok(_) => {}
         Err(e) => {
             eprintln!("Failed to compile the protos: {:?}", e);
