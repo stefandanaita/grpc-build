@@ -12,7 +12,7 @@ pub fn compile(
     let mut protos = vec![];
     get_protos(protos.as_mut(), Path::new(input_dir))?;
 
-    let mut includes = includes.iter().map(|i| PathBuf::from(i)).collect::<Vec<PathBuf>>();
+    let mut includes = includes.iter().map(PathBuf::from).collect::<Vec<PathBuf>>();
 
     let compile_includes: PathBuf = match Path::new(input_dir).parent() {
         None => PathBuf::from("."),
