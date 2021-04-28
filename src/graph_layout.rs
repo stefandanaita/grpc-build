@@ -8,8 +8,6 @@ pub struct ProtoGraphNode {
     is_root: bool,
     is_leaf: bool,
     weight: String,
-    filename: String,
-    leaf_token: Option<String>,
 }
 
 pub fn generate(output_dir: &str) -> Result<Graph<ProtoGraphNode, ()>, anyhow::Error> {
@@ -17,9 +15,7 @@ pub fn generate(output_dir: &str) -> Result<Graph<ProtoGraphNode, ()>, anyhow::E
     let root_node = proto_graph.add_node(ProtoGraphNode {
         is_root: true,
         is_leaf: false,
-        weight: "root".to_string(),
-        filename: "root".to_string(),
-        leaf_token: None,
+        weight: String::from("root"),
     });
 
     let mut file_names: Vec<String> = vec![];
@@ -32,36 +28,20 @@ pub fn generate(output_dir: &str) -> Result<Graph<ProtoGraphNode, ()>, anyhow::E
     let mut curr_node: NodeIndex;
     let mut prev_node: NodeIndex;
 
-    for filename_with_extension in file_names.iter() {
-        let filename = filename_with_extension.replace(".rs", "");
-
-        let tokens = filename.split('.');
-        let tokens_no = tokens.clone().count();
+    for name in file_names.iter() {
+        let tokens = name.split('.');
 
         prev_node = root_node;
-        for (i, token) in tokens.clone().enumerate() {
+        for token in tokens {
             let mut node = ProtoGraphNode {
                 is_root: false,
                 is_leaf: false,
                 weight: token.to_string(),
-                filename: String::from(filename_with_extension),
-                leaf_token: None,
             };
 
-            if i == tokens_no - 1 {
-                node.weight = filename.to_string();
+            if token == "rs" {
+                node.weight = name.to_string();
                 node.is_leaf = true;
-                node.leaf_token = Some(token.to_string());
-
-                let to_remove = format!(".{}", token);
-                let fname = &filename.replace(&to_remove, "").replace(".", "/");
-
-                fs::create_dir_all(format!("{}/{}", output_dir, fname)).unwrap();
-                fs::rename(
-                    format!("{}/{}", output_dir, filename_with_extension),
-                    format!("{}/{}/{}", output_dir, fname, filename_with_extension),
-                )
-                .unwrap();
             }
 
             let existing_node = proto_graph
@@ -105,12 +85,7 @@ pub fn display(
     }
 
     if graph[node].is_leaf {
-        file.write_all(format!("#[path = \"{}\"]\n", graph[node].filename).as_bytes())?;
-
-        match &graph[node].leaf_token {
-            None => (),
-            Some(token) => file.write_all(format!("pub mod {};\n", &token).as_bytes())?,
-        }
+        file.write_all(format!("include!(\"{}\");", graph[node].weight).as_bytes())?;
     } else {
         for child in children {
             display(graph, file, child)?;
