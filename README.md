@@ -28,6 +28,12 @@ To overwrite the contents of the output directory, use the `--force` (`-f`) flag
 grpc-build build -c -s --in-dir="<protobuf directory>" --out-dir="<codegen>" -f
 ```
 
+To use additional include paths, use the `--include` (`-I`) flag.
+
+```
+grpc-build build -c -s --in-dir="<protobuf directory>" --out-dir="<codegen>" -f -I/usr/local/include -I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis
+```
+
 ### Using it as a library
 
 The most convenient way of using `grpc_build` as a library is by taking advantage of Rust's `build.rs` file. Don't forget to add `grpc_build` to the [build-dependencies](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#build-dependencies) list.
