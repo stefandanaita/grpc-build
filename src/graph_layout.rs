@@ -25,6 +25,8 @@ pub fn generate(output_dir: &str) -> Result<Graph<ProtoGraphNode, ()>, anyhow::E
         file_names.push(String::from(name));
     }
 
+    file_names.sort();
+
     let mut curr_node: NodeIndex;
     let mut prev_node: NodeIndex;
 
