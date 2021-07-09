@@ -3,11 +3,10 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -42,9 +41,9 @@ jobs:
 
       - name: Compile to binary
         run: cargo install -f --path .
-      
+
       - name: Copy the binary
-        run: cp ~/.cargo/bin/grpc-build ./grpc-build
+        run: cp ~/.cargo/bin/grpc_build ./grpc-build
 
       - name: Create Release
         id: create_release
