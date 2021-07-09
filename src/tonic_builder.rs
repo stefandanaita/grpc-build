@@ -5,22 +5,27 @@ use std::{fs, io};
 pub fn compile(
     input_dir: &str,
     output_dir: &str,
+    includes: &[String],
     server: bool,
     client: bool,
 ) -> Result<(), anyhow::Error> {
     let mut protos = vec![];
     get_protos(protos.as_mut(), Path::new(input_dir))?;
 
+    let mut includes = includes.iter().map(|i| PathBuf::from(i)).collect::<Vec<PathBuf>>();
+
     let compile_includes: PathBuf = match Path::new(input_dir).parent() {
         None => PathBuf::from("."),
         Some(parent) => parent.to_path_buf(),
     };
 
+    includes.push(compile_includes);
+
     tonic_build::configure()
         .out_dir(output_dir)
         .build_client(client)
         .build_server(server)
-        .compile(protos.as_slice(), &[compile_includes])?;
+        .compile(protos.as_slice(), includes.as_slice())?;
 
     Ok(())
 }
