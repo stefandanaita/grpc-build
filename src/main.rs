@@ -47,9 +47,9 @@ fn main() -> Result<(), anyhow::Error> {
                     .iter()
                     .map(|type_attribute| type_attribute.split_once(":"))
                     .collect::<Option<Vec<(&str, &str)>>>()
-                    .ok_or_else(|| anyhow::anyhow!(
-                        "type attribute must have ':' between path and attribute"
-                    ))?,
+                    .ok_or_else(|| {
+                        anyhow::anyhow!("type attribute must have ':' between path and attribute")
+                    })?,
                 build_server,
                 build_client,
                 force,
