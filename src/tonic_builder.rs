@@ -6,6 +6,7 @@ pub fn compile(
     input_dir: &str,
     output_dir: &str,
     includes: &[String],
+    type_attributes: &[(&str, &str)],
     server: bool,
     client: bool,
 ) -> Result<(), anyhow::Error> {
@@ -21,13 +22,18 @@ pub fn compile(
 
     includes.push(compile_includes);
 
-    tonic_build::configure()
+    let mut builder = tonic_build::configure()
         .out_dir(output_dir)
         .build_client(client)
-        .build_server(server)
-        .compile(protos.as_slice(), includes.as_slice())?;
+        .build_server(server);
 
-    Ok(())
+    for (path, attribute) in type_attributes {
+        builder = builder.type_attribute(path, attribute);
+    }
+
+    builder
+        .compile(protos.as_slice(), includes.as_slice())
+        .map_err(From::from)
 }
 
 fn get_protos(protos: &mut Vec<PathBuf>, dir: &Path) -> io::Result<()> {
