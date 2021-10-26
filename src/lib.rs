@@ -6,6 +6,7 @@ use std::fs::File;
 use std::path::Path;
 use std::process::Command;
 use thiserror::Error;
+use tonic_build::Builder;
 
 mod graph_layout;
 mod tonic_builder;
@@ -28,6 +29,17 @@ pub fn build(
     build_server: bool,
     build_client: bool,
     force: bool,
+) -> Result<(), BuildError> {
+    build_with_config(in_dir, out_dir, build_server, build_client, force, |c| c)
+}
+
+pub fn build_with_config(
+    in_dir: &str,
+    out_dir: &str,
+    build_server: bool,
+    build_client: bool,
+    force: bool,
+    user_config: impl FnOnce(Builder) -> Builder,
 ) -> Result<(), BuildError> {
     if Path::new(out_dir).exists() {
         if !force {
@@ -57,7 +69,7 @@ pub fn build(
         }
     };
 
-    match compile(in_dir, out_dir, build_server, build_client) {
+    match compile(in_dir, out_dir, build_server, build_client, user_config) {
         Ok(_) => {}
         Err(e) => {
             eprintln!("Failed to compile the protos: {:?}", e);
