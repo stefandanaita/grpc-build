@@ -1,12 +1,14 @@
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::{fs, io};
+use tonic_build::Builder;
 
 pub fn compile(
     input_dir: &str,
     output_dir: &str,
     server: bool,
     client: bool,
+    user_config: impl FnOnce(Builder) -> Builder,
 ) -> Result<(), anyhow::Error> {
     let mut protos = vec![];
     get_protos(protos.as_mut(), Path::new(input_dir))?;
@@ -16,11 +18,13 @@ pub fn compile(
         Some(parent) => parent.to_path_buf(),
     };
 
-    tonic_build::configure()
-        .out_dir(output_dir)
-        .build_client(client)
-        .build_server(server)
-        .compile(protos.as_slice(), &[compile_includes])?;
+    user_config(
+        tonic_build::configure()
+            .out_dir(output_dir)
+            .build_client(client)
+            .build_server(server),
+    )
+    .compile(protos.as_slice(), &[compile_includes])?;
 
     Ok(())
 }

@@ -48,5 +48,7 @@ fn main() {
 }
 ```
 
+If you want to set advanced compilation options (like an additional `#[derive]` for the generated types), use the `build_with_config` function, which exposes the underlying [`tonic_build::Builder`](https://docs.rs/tonic-build/0.5.0/tonic_build/struct.Builder.html).
+
 ## License
 This project is licensed under the [MIT license](https://github.com/stefandanaita/grpc-build/blob/master/LICENSE).
