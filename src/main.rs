@@ -1,3 +1,4 @@
+use anyhow::Result;
 use grpc_build::build;
 
 #[derive(structopt::StructOpt)]
@@ -20,7 +21,7 @@ pub enum Command {
     },
 }
 
-fn main() -> Result<(), anyhow::Error> {
+fn main() -> Result<()> {
     let command = <Command as paw::ParseArgs>::parse_args()?;
 
     match command {
@@ -30,10 +31,6 @@ fn main() -> Result<(), anyhow::Error> {
             build_client,
             build_server,
             force,
-        } => {
-            build(&in_dir, &out_dir, build_server, build_client, force)?;
-        }
+        } => build(&in_dir, &out_dir, build_server, build_client, force),
     }
-
-    Ok(())
 }
