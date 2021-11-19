@@ -23,7 +23,7 @@ pub fn build_with_config(
     force: bool,
     user_config: impl FnOnce(Builder) -> Builder,
 ) -> Result<()> {
-    if force && Path::new(out_dir).exists() {
+    if !force && Path::new(out_dir).exists() {
         return Err(anyhow!("the output directory already exists: {}", out_dir));
     }
 
