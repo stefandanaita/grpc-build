@@ -34,7 +34,6 @@ pub fn build_with_config(
 
     base::refactor(out_dir).context("failed to refactor the protos")?;
 
-
     Ok(())
 }
 

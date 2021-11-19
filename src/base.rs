@@ -1,4 +1,8 @@
-use std::{ffi::OsString, path::{Path, PathBuf}, process::Command};
+use std::{
+    ffi::OsString,
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 use anyhow::{Context, Result};
 use walkdir::WalkDir;
