@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package grpc_build.response.helloworld;
+
+// The response message containing the greetings
+message HelloReply {
+  string message = 1;
+}
