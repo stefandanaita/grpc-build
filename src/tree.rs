@@ -11,8 +11,8 @@ use std::{
 
 use anyhow::{Context, Result};
 
-#[derive(Default, Debug)]
-pub struct Tree(HashMap<PathBuf, Tree>);
+#[derive(Default, Debug, PartialEq)]
+pub struct Tree(pub(crate) HashMap<PathBuf, Tree>);
 
 impl Extend<PathBuf> for Tree {
     fn extend<T: IntoIterator<Item = PathBuf>>(&mut self, iter: T) {
@@ -88,5 +88,59 @@ impl Display for Tree {
             }
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+    use std::collections::HashMap;
+
+    use super::Tree;
+
+    macro_rules! tree {
+        ($($key:literal : $val:expr,)*) => {
+            Tree(HashMap::from_iter([
+                $(
+                    (PathBuf::from($key), $val)
+                ),*
+            ]))
+        };
+    }
+
+    #[test]
+    fn build_tree() {
+        let tree: Tree = [
+            "grpc_build.client.helloworld.rs",
+            "grpc_build.request.helloworld.rs",
+            "grpc_build.response.helloworld.rs",
+            "google.protobuf.foo.rs",
+            "google.protobuf.bar.rs",
+        ]
+        .into_iter()
+        .map(PathBuf::from)
+        .collect();
+
+        let expected = tree!{
+            "grpc_build": tree!{
+                "client": tree!{
+                    "helloworld": tree!{},
+                },
+                "request": tree!{
+                    "helloworld": tree!{},
+                },
+                "response": tree!{
+                    "helloworld": tree!{},
+                },
+            },
+            "google": tree!{
+                "protobuf": tree!{
+                    "foo": tree!{},
+                    "bar": tree!{},
+                },
+            },
+        };
+
+        assert_eq!(tree, expected);
     }
 }
