@@ -93,8 +93,8 @@ impl Display for Tree {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
     use std::collections::HashMap;
+    use std::path::PathBuf;
 
     use super::Tree;
 
@@ -121,20 +121,20 @@ mod tests {
         .map(PathBuf::from)
         .collect();
 
-        let expected = tree!{
-            "grpc_build": tree!{
-                "client": tree!{
+        let expected = tree! {
+            "grpc_build": tree! {
+                "client": tree! {
                     "helloworld": tree!{},
                 },
-                "request": tree!{
+                "request": tree! {
                     "helloworld": tree!{},
                 },
-                "response": tree!{
+                "response": tree! {
                     "helloworld": tree!{},
                 },
             },
-            "google": tree!{
-                "protobuf": tree!{
+            "google": tree! {
+                "protobuf": tree! {
                     "foo": tree!{},
                     "bar": tree!{},
                 },
