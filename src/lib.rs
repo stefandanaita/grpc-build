@@ -1,27 +1,9 @@
-use crate::graph_layout::{display, generate};
-use crate::tonic_builder::compile;
-use petgraph::graph::NodeIndex;
-use std::fs;
-use std::fs::File;
-use std::path::Path;
-use std::process::Command;
-use thiserror::Error;
+use anyhow::{anyhow, Context, Result};
+use std::path::{Path, PathBuf};
 use tonic_build::Builder;
 
-mod graph_layout;
-mod tonic_builder;
-
-#[derive(Error, Debug)]
-pub enum BuildError {
-    #[error("The output directory already exists: {0}")]
-    OutputDirectoryExistsError(String),
-
-    #[error("Formatting the generated mod.rs file failed: {0}")]
-    FormattingError(String),
-
-    #[error("{0}")]
-    Error(String),
-}
+pub mod base;
+pub mod tree;
 
 pub fn build(
     in_dir: &str,
@@ -29,7 +11,7 @@ pub fn build(
     build_server: bool,
     build_client: bool,
     force: bool,
-) -> Result<(), BuildError> {
+) -> Result<()> {
     build_with_config(in_dir, out_dir, build_server, build_client, force, |c| c)
 }
 
@@ -40,82 +22,42 @@ pub fn build_with_config(
     build_client: bool,
     force: bool,
     user_config: impl FnOnce(Builder) -> Builder,
-) -> Result<(), BuildError> {
-    if Path::new(out_dir).exists() {
-        if !force {
-            return Err(BuildError::OutputDirectoryExistsError(String::from(
-                out_dir,
-            )));
-        }
-
-        match fs::remove_dir_all(out_dir) {
-            Ok(_) => {}
-            Err(e) => {
-                eprintln!("Failed to remove the output directory: {:?}", e);
-                return Err(BuildError::Error(String::from(
-                    "Could not remove the output directory",
-                )));
-            }
-        };
+) -> Result<()> {
+    if !force && Path::new(out_dir).exists() {
+        return Err(anyhow!("the output directory already exists: {}", out_dir));
     }
 
-    match fs::create_dir_all(out_dir) {
-        Ok(_) => {}
-        Err(e) => {
-            eprintln!("Failed to create the output directory: {:?}", e);
-            return Err(BuildError::Error(String::from(
-                "Could not create the output directory",
-            )));
-        }
+    base::prepare_out_dir(out_dir).context("failed to prepare out dir")?;
+
+    compile(in_dir, out_dir, build_server, build_client, user_config)
+        .context("failed to compile the protos")?;
+
+    base::refactor(out_dir).context("failed to refactor the protos")?;
+
+    Ok(())
+}
+
+fn compile(
+    input_dir: &str,
+    output_dir: &str,
+    server: bool,
+    client: bool,
+    user_config: impl FnOnce(Builder) -> Builder,
+) -> Result<(), anyhow::Error> {
+    let protos = crate::base::get_protos(input_dir).collect::<Vec<_>>();
+
+    let compile_includes: PathBuf = match Path::new(input_dir).parent() {
+        None => PathBuf::from("."),
+        Some(parent) => parent.to_path_buf(),
     };
 
-    match compile(in_dir, out_dir, build_server, build_client, user_config) {
-        Ok(_) => {}
-        Err(e) => {
-            eprintln!("Failed to compile the protos: {:?}", e);
-            return Err(BuildError::Error(String::from(
-                "Failed the compile the protos",
-            )));
-        }
-    };
-
-    let graph = match generate(out_dir) {
-        Ok(graph) => graph,
-        Err(e) => {
-            eprintln!("Failed to generate the graph: {:?}", e);
-            return Err(BuildError::Error(String::from(
-                "Failed to generate the graph",
-            )));
-        }
-    };
-
-    let mut proto_lib = match File::create(format!("{}/mod.rs", out_dir)) {
-        Ok(file) => file,
-        Err(e) => {
-            eprintln!("Failed to create the mod.rs file: {:?}", e);
-            return Err(BuildError::Error(String::from(
-                "Failed to create the mod.rs file",
-            )));
-        }
-    };
-
-    match display(&graph, &mut proto_lib, NodeIndex::from(0)) {
-        Ok(_) => {}
-        Err(e) => {
-            eprintln!("Failed to populate the mod.rs file: {:?}", e);
-            return Err(BuildError::Error(String::from(
-                "Failed to populate the mod.rs file",
-            )));
-        }
-    };
-
-    match Command::new("rustfmt")
-        .arg(format!("{}/mod.rs", out_dir))
-        .spawn()
-    {
-        Ok(_) => println!("Successfully formatted the mod.rs file using Rustfmt"),
-        Err(e) => eprintln!("Failed to populate the mod.rs file: {:?}", e),
-    }
+    user_config(
+        tonic_build::configure()
+            .out_dir(output_dir)
+            .build_client(client)
+            .build_server(server),
+    )
+    .compile(&protos, &[compile_includes])?;
 
     Ok(())
 }

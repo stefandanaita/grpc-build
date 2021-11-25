@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+import "grpc_build/request/helloworld.proto";
+import "grpc_build/response/helloworld.proto";
+
+package grpc_build.client.helloworld;
+
+// The greeting service definition.
+service Greeter {
+  // Sends a greeting
+  rpc SayHello (grpc_build.request.helloworld.HelloRequest) returns (grpc_build.response.helloworld.HelloReply) {}
+}

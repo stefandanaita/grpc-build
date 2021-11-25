@@ -32,7 +32,7 @@ grpc-build build -c -s --in-dir="<protobuf directory>" --out-dir="<codegen>" -f
 
 The most convenient way of using `grpc_build` as a library is by taking advantage of Rust's `build.rs` file. Don't forget to add `grpc_build` to the [build-dependencies](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#build-dependencies) list.
 
-```
+```rust
 // build.rs
 use grpc_build::build;
 
@@ -49,6 +49,32 @@ fn main() {
 ```
 
 If you want to set advanced compilation options (like an additional `#[derive]` for the generated types), use the `build_with_config` function, which exposes the underlying [`tonic_build::Builder`](https://docs.rs/tonic-build/0.5.0/tonic_build/struct.Builder.html).
+
+A more advanced usage is to use the `get_protos` and `refactor` functions yourself. The following example does the same as the example above
+
+```rust
+use grpc_build::base::{prepare_out_dir, get_protos, refactor};
+use tonic_build::configure;
+
+fn main() {
+    let proto_src_dir = "protos";
+    let proto_out_dir = "src/protogen";
+
+    prepare_out_dir(proto_out_dir).unwrap();
+
+    configure()
+        .out_dir(proto_out_dir)
+        .build_server(true)
+        .build_client(true)
+        .compile(
+            &get_protos(proto_src_dir).collect::<Vec<_>>(),
+            &["."]
+        )
+        .unwrap();
+
+    refactor(proto_out_dir).unwrap();
+}
+```
 
 ## License
 This project is licensed under the [MIT license](https://github.com/stefandanaita/grpc-build/blob/master/LICENSE).

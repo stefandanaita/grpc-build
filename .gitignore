@@ -5,3 +5,4 @@
 /src/protos
 /src/protogen
 .DS_Store
+/tests/compile_test/protos
