@@ -6,6 +6,8 @@ It is built on top of [tonic_build](https://github.com/hyperium/tonic/tree/maste
 
 If the protobuf content is valid (worth [linting it](https://buf.build/docs/tour-4)), `grpc-build` will take care of the protobuf imports and it will also generate the `mod.rs` file to allow the compiler to find the generated code. This file will be placed inside the *output directory*.
 
+This version of `grpc-build` will automatically generate serde Serialize and Deserialize implementations using [pbjson](https://github.com/influxdata/pbjson).
+
 It comes both as a library that can be used directly inside a project and as a binary that can be used in CI pipelines.
 
 [Documentation](https://docs.rs/grpc-build) - [Crates.io](https://crates.io/crates/grpc-build)

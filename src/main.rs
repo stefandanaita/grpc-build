@@ -45,7 +45,7 @@ fn main() -> Result<(), anyhow::Error> {
                 includes.as_slice(),
                 &type_attributes
                     .iter()
-                    .map(|type_attribute| type_attribute.split_once(":"))
+                    .map(|type_attribute| type_attribute.split_once(':'))
                     .collect::<Option<Vec<(&str, &str)>>>()
                     .ok_or_else(|| {
                         anyhow::anyhow!("type attribute must have ':' between path and attribute")

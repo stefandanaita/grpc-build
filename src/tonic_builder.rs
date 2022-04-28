@@ -22,8 +22,13 @@ pub fn compile(
 
     includes.push(compile_includes);
 
+    let descriptor_path = PathBuf::from(output_dir).join("proto_descriptor.bin");
+
     let mut builder = tonic_build::configure()
         .out_dir(output_dir)
+        .file_descriptor_set_path(&descriptor_path)
+        .compile_well_known_types(true)
+        .extern_path(".google.protobuf", "::pbjson_types")
         .build_client(client)
         .build_server(server);
 
@@ -33,7 +38,13 @@ pub fn compile(
 
     builder
         .compile(protos.as_slice(), includes.as_slice())
-        .map_err(From::from)
+        .map_err(anyhow::Error::from)?;
+
+    pbjson_build::Builder::new()
+        .out_dir(output_dir)
+        .register_descriptors(&std::fs::read(descriptor_path)?)?
+        .build(&["."])
+        .map_err(anyhow::Error::from)
 }
 
 fn get_protos(protos: &mut Vec<PathBuf>, dir: &Path) -> io::Result<()> {

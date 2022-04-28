@@ -23,6 +23,9 @@ name = "grpc_build"
 
 [dependencies]
 prost = "0.8"
+pbjson = "0.3.0"
+pbjson-types = "0.3.0"
+pbjson-build = "0.3.0"
 petgraph = "0.6"
 anyhow = "1"
 tonic-build = "0.5"
