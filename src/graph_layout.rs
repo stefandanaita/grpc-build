@@ -83,7 +83,9 @@ pub fn display(
     }
 
     if !graph[node].is_leaf {
-        file.write_all(format!("pub mod {} {{\n", graph[node].weight).as_bytes())?;
+        if !graph[node].weight.contains("serde") {
+            file.write_all(format!("pub mod {} {{\n", graph[node].weight).as_bytes())?;
+        }
     }
 
     if graph[node].is_leaf {
@@ -94,7 +96,7 @@ pub fn display(
         }
     }
 
-    if !graph[node].is_leaf {
+    if !graph[node].is_leaf && !graph[node].weight.contains("serde") {
         file.write_all(b"}\n")?;
     }
 
