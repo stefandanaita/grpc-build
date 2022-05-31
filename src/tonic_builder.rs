@@ -43,6 +43,8 @@ pub fn compile(
     pbjson_build::Builder::new()
         .out_dir(output_dir)
         .register_descriptors(&std::fs::read(descriptor_path)?)?
+        .ignore_unknown_fields()
+        .exclude([".google.protobuf"])
         .build(&["."])
         .map_err(anyhow::Error::from)
 }

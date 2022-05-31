@@ -22,13 +22,13 @@ path = "src/lib.rs"
 name = "grpc_build"
 
 [dependencies]
-prost = "0.8"
-pbjson = "0.3.0"
-pbjson-types = "0.3.0"
-pbjson-build = "0.3.0"
+prost = "0.10"
+pbjson = "0.3.2"
+pbjson-types = "0.3.2"
+pbjson-build = "0.3.2"
 petgraph = "0.6"
 anyhow = "1"
-tonic-build = "0.5"
+tonic-build = "0.7"
 structopt = { version ="0.3", features = ["paw"] }
 paw = "1"
 thiserror = "1"
