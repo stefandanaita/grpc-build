@@ -126,7 +126,7 @@ dependencies = [
  "anyhow",
  "paw",
  "pbjson",
- "pbjson-build",
+ "pbjson-build 0.3.2 (git+https://github.com/influxdata/pbjson.git?rev=b6af2a3)",
  "pbjson-types",
  "petgraph",
  "prost",
@@ -289,6 +289,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "pbjson-build"
+version = "0.3.2"
+source = "git+https://github.com/influxdata/pbjson.git?rev=b6af2a3#b6af2a39e7e78d41673769e8ea9c053304a21bc4"
+dependencies = [
+ "heck 0.4.0",
+ "itertools",
+ "prost",
+ "prost-types",
+]
+
+[[package]]
 name = "pbjson-types"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -297,7 +308,7 @@ dependencies = [
  "bytes",
  "chrono",
  "pbjson",
- "pbjson-build",
+ "pbjson-build 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "prost",
  "prost-build",
  "serde",
