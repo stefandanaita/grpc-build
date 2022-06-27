@@ -7,11 +7,16 @@ In addition to that, this library adds another feature: full proto name annotati
 This could be useful in cases where you want use the full name (package + message name) to identify a protobuf message.
 Therefore, for each top-level protobuf message this library adds a method to its generated struct returning its full proto name.
 
-```
+Given the following protobuf definition:
+```protobuf
+// my_message.proto
 package grpc_build;
 message Message {}
-// The above proto generates the standard rust code in addition to `full_proto_name`.
+```
+this library will generate the standard rust code plus the extra impl for each message.
 
+```rust
+// Message.rs (generated)
 struct Message {}
 
 Impl Message {
