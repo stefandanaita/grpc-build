@@ -3,6 +3,26 @@
 `grpc-build` provides an flexible way to manage protobuf files and generate the gRPC code required by [tonic](https://github.com/hyperium/tonic).
 
 It is built on top of [tonic_build](https://github.com/hyperium/tonic/tree/master/tonic-build) and it extends its functionality by compiling all the protobuf files inside a directory.
+In addition to that, this library adds another feature: full proto name annotation.
+This could be useful in cases where you want use the full name (package + message name) to identify a protobuf message.
+Therefore, for each top-level protobuf message this library adds a method to its generated struct returning its full proto name.
+
+```
+package grpc_build;
+message Message {}
+// The above proto generates the standard rust code in addition to `full_proto_name`.
+
+struct Message {}
+
+Impl Message {
+    /// This returns package (grpc-build) + message name (Message).
+    fn full_proto_name() -> &'static str {
+        "grpc_build.MyMessage"
+    }
+}
+
+```
+
 
 If the protobuf content is valid (worth [linting it](https://buf.build/docs/tour-4)), `grpc-build` will take care of the protobuf imports and it will also generate the `mod.rs` file to allow the compiler to find the generated code. This file will be placed inside the *output directory*.
 
