@@ -13,13 +13,14 @@ Given the following protobuf definition:
 package grpc_build;
 message Message {}
 ```
-this library will generate the standard rust code plus the extra impl for each message.
+
+The library will generate the standard Rust code plus the extra impl for each message.
 
 ```rust
 // Message.rs (generated)
 struct Message {}
 
-Impl Message {
+impl Message {
     /// This returns package (grpc-build) + message name (Message).
     fn full_proto_name() -> &'static str {
         "grpc_build.MyMessage"
