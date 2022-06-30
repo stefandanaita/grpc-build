@@ -8,7 +8,10 @@ use std::{
 use tonic_build::Builder;
 
 pub mod base;
+mod ident;
 pub mod tree;
+
+// pub use grpc_build_derive::FullyQualifiedName;
 
 pub fn build(
     in_dir: &str,
@@ -26,7 +29,7 @@ pub fn build_with_config(
     build_server: bool,
     build_client: bool,
     force: bool,
-    user_config: impl FnOnce(Builder) -> Builder,
+    user_config: impl Fn(Builder) -> Builder,
 ) -> Result<()> {
     if !force && Path::new(out_dir).exists() {
         return Err(anyhow!("the output directory already exists: {}", out_dir));
@@ -47,7 +50,7 @@ fn compile(
     output_dir: &str,
     server: bool,
     client: bool,
-    user_config: impl FnOnce(Builder) -> Builder,
+    user_config: impl Fn(Builder) -> Builder,
 ) -> Result<(), anyhow::Error> {
     let protos = crate::base::get_protos(input_dir).collect::<Vec<_>>();
 
@@ -66,25 +69,33 @@ fn compile(
     let file_descriptor_path = tmp.path().join("grpc-descriptor-set");
     let tmp_dir = tempfile::Builder::new().prefix("grpc-build").tempdir()?;
 
-    let config = user_config(tonic_build::configure());
-    config
-        .clone()
-        .build_client(client)
-        .build_server(server)
-        // HACK: we compile it once to get the file_descriptor_set.
-        // But we just hide it in a temp folder.
-        // This is because tonci_build does not expose the `skip_protoc_run` fucntion
-        // like prost_build so we cannot skip it.
-        .out_dir(tmp_dir.path())
-        .file_descriptor_set_path(file_descriptor_path.clone())
-        .compile(&protos, &[compile_includes.clone()])?;
+    // let file_descriptor_path = Path::new(output_dir).join("grpc-descriptor-set");
 
-    let buf = std::fs::read(file_descriptor_path.clone())?;
-    let file_descriptor_set = FileDescriptorSet::decode(&*buf)
-        .map_err(|error| anyhow::anyhow!("invalid FileDescriptorSet: {}", error))?;
+    user_config(
+        tonic_build::configure()
+            .build_client(client)
+            .build_server(server)
+            // HACK: we compile it once to get the file_descriptor_set.
+            // But we just hide it in a temp folder.
+            // This is because tonci_build does not expose the `skip_protoc_run` fucntion
+            // like prost_build so we cannot skip it.
+            .out_dir(tmp_dir.path())
+            .file_descriptor_set_path(&file_descriptor_path),
+    )
+    .compile(&protos, &[&compile_includes])?;
 
-    let mut config = tonic_build::configure();
+    let buf = std::fs::read(&file_descriptor_path)?;
+    let file_descriptor_set =
+        FileDescriptorSet::decode(&*buf).context("invalid FileDescriptorSet")?;
 
+    // // Build mapping of <full_name, annotation>.
+    // let annotations: String = file_descriptor_set
+    //     .file
+    //     .iter()
+    //     .map(|descriptor| build_full_name_impls(descriptor, descriptor.package()))
+    //     .collect();
+
+    // for (name, annotation) in &annotations {
     // Build mapping of <full_name, annotation>.
     let annotations: HashMap<String, String> =
         file_descriptor_set
@@ -95,17 +106,20 @@ fn compile(
                 acc
             });
 
+    let mut config = tonic_build::configure();
     for (name, annotation) in &annotations {
         config = config.type_attribute(&name, annotation);
     }
 
-    config
-        .build_client(client)
-        .out_dir(output_dir)
-        .build_server(server)
-        .file_descriptor_set_path(file_descriptor_path.clone())
-        .compile(&protos, &[compile_includes])?;
+    user_config(
+        config
+            .build_client(client)
+            .build_server(server)
+            .out_dir(output_dir),
+    )
+    .compile(&protos, &[&compile_includes])?;
 
+    // Ok(annotations)
     Ok(())
 }
 
@@ -119,13 +133,13 @@ fn build_annotations_in_file(
         .iter()
         .map(|message| {
             let full_name = fully_qualified_name(namespace, message.name());
-            (
-                full_name.clone(),
-                format!(
-                    "#[derive(::grpc_build_derive::FullyQualifiedName)] #[name = \"{}\"]",
-                    &full_name
-                ),
-            )
+            let item_path = fully_qualified_path(message.name());
+            let impl_ = format!(
+                "impl {item_path} {{
+                    pub fn full_proto_name() -> &'static str {{ \"{full_name}\" }}
+                }}"
+            );
+            (full_name, impl_)
         })
         .collect()
 }
@@ -141,4 +155,8 @@ fn fully_qualified_name(namespace: &str, name: &str) -> String {
         full_name.push_str(name);
         full_name
     }
+}
+
+fn fully_qualified_path(name: &str) -> String {
+    ident::to_upper_camel(name)
 }

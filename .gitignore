@@ -2,8 +2,8 @@
 .idea
 /protos
 /protogen
-grpc-build/src/protos
+src/protos
 /src/protogen
 .DS_Store
-grpc-build/tests/compile_test/protos
+tests/compile_test/protos
 Cargo.lock
