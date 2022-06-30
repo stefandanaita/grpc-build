@@ -11,8 +11,6 @@ pub mod base;
 mod ident;
 pub mod tree;
 
-// pub use grpc_build_derive::FullyQualifiedName;
-
 pub fn build(
     in_dir: &str,
     out_dir: &str,
@@ -69,8 +67,6 @@ fn compile(
     let file_descriptor_path = tmp.path().join("grpc-descriptor-set");
     let tmp_dir = tempfile::Builder::new().prefix("grpc-build").tempdir()?;
 
-    // let file_descriptor_path = Path::new(output_dir).join("grpc-descriptor-set");
-
     user_config(
         tonic_build::configure()
             .build_client(client)
@@ -88,14 +84,6 @@ fn compile(
     let file_descriptor_set =
         FileDescriptorSet::decode(&*buf).context("invalid FileDescriptorSet")?;
 
-    // // Build mapping of <full_name, annotation>.
-    // let annotations: String = file_descriptor_set
-    //     .file
-    //     .iter()
-    //     .map(|descriptor| build_full_name_impls(descriptor, descriptor.package()))
-    //     .collect();
-
-    // for (name, annotation) in &annotations {
     // Build mapping of <full_name, annotation>.
     let annotations: HashMap<String, String> =
         file_descriptor_set
@@ -119,7 +107,6 @@ fn compile(
     )
     .compile(&protos, &[&compile_includes])?;
 
-    // Ok(annotations)
     Ok(())
 }
 
@@ -133,7 +120,7 @@ fn build_annotations_in_file(
         .iter()
         .map(|message| {
             let full_name = fully_qualified_name(namespace, message.name());
-            let item_path = fully_qualified_path(message.name());
+            let item_path = ident::to_upper_camel(message.name());
             let impl_ = format!(
                 "impl {item_path} {{
                     pub fn full_proto_name() -> &'static str {{ \"{full_name}\" }}
@@ -155,8 +142,4 @@ fn fully_qualified_name(namespace: &str, name: &str) -> String {
         full_name.push_str(name);
         full_name
     }
-}
-
-fn fully_qualified_path(name: &str) -> String {
-    ident::to_upper_camel(name)
 }
