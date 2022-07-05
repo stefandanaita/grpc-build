@@ -30,7 +30,7 @@ pub fn build_with_config(
     build_server: bool,
     build_client: bool,
     force: bool,
-    user_config: impl Fn(Builder) -> Builder,
+    user_config: impl FnOnce(Builder) -> Builder,
 ) -> Result<()> {
     if !force && Path::new(out_dir).exists() {
         return Err(anyhow!("the output directory already exists: {}", out_dir));
@@ -176,7 +176,7 @@ fn compile(
     output_dir: &str,
     server: bool,
     client: bool,
-    user_config: impl Fn(Builder) -> Builder,
+    user_config: impl FnOnce(Builder) -> Builder,
 ) -> Result<(), anyhow::Error> {
     let protos = crate::base::get_protos(input_dir).collect::<Vec<_>>();
 
