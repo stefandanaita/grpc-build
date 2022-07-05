@@ -14,4 +14,9 @@ async fn foo(
     Ok(client.say_hello(req).await?.into_inner())
 }
 
-fn main() {}
+fn main() {
+    assert_eq!(
+        HelloReply::full_proto_name(),
+        "grpc_build.response.helloworld.HelloReply"
+    );
+}
