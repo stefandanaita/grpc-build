@@ -15,4 +15,5 @@ categories = ["development-tools"]
 
 [dependencies]
 grpc-build-derive = { version = "0.1.0", path = "../grpc-build-derive" }
-
+prost-types = "0.10"
+bytes = "1"
