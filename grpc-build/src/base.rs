@@ -52,11 +52,7 @@ pub fn get_protos(input: impl AsRef<Path>) -> impl Iterator<Item = PathBuf> {
 /// This might not be the most desirable. Running this function converts the file into a more expected directory
 /// structure and generates the expected mod file output
 pub fn refactor(output: impl AsRef<Path>) -> Result<()> {
-    refactor_inner(output, "")
-}
-
-pub(crate) fn refactor_inner(output: impl AsRef<Path>, extra_impls: &str) -> Result<()> {
-    fn inner(output: &Path, extra_impls: &str) -> Result<()> {
+    fn inner(output: &Path) -> Result<()> {
         let tree: crate::tree::Tree = std::fs::read_dir(output)?
             .filter_map(|r| r.map_err(|err| println!("cargo:warning={:?}", err)).ok())
             .filter(|e| e.path().extension().map_or(false, |e| e == "rs"))
@@ -65,7 +61,7 @@ pub(crate) fn refactor_inner(output: impl AsRef<Path>, extra_impls: &str) -> Res
             .collect();
 
         tree.move_paths(output, OsString::new(), PathBuf::new())?;
-        std::fs::write(output.join("mod.rs"), tree.to_string() + extra_impls)?;
+        std::fs::write(output.join("mod.rs"), tree.to_string())?;
 
         Command::new("rustfmt")
             .arg(output.join("mod.rs"))
@@ -74,5 +70,5 @@ pub(crate) fn refactor_inner(output: impl AsRef<Path>, extra_impls: &str) -> Res
 
         Ok(())
     }
-    inner(output.as_ref(), extra_impls)
+    inner(output.as_ref())
 }
