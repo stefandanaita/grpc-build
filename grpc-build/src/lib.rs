@@ -76,7 +76,7 @@ impl Builder {
         }
 
         cmd.output().context(
-            "failed to invoke protoc (hint: https://docs.rs/prost-build/#sourcing-protoc): {error}",
+            "failed to invoke protoc (hint: https://docs.rs/prost-build/#sourcing-protoc)",
         )?;
         Ok(())
     }

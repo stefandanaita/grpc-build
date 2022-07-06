@@ -1,7 +1,5 @@
 use std::{ffi::OsString, path::Path};
 
-// use tonic_build::Attributes;
-
 /// A mirror of [`tonic_build::Builder`] for our own control
 pub struct Builder {
     pub(crate) tonic: tonic_build::Builder,
