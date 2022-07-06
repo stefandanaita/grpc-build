@@ -20,15 +20,11 @@ The library will generate the standard Rust code plus the extra impl for each me
 // Message.rs (generated)
 struct Message {}
 
-impl Message {
+impl NamedMessage for Message {
     /// This returns package (grpc-build) + message name (Message).
-    fn full_proto_name() -> &'static str {
-        "grpc_build.MyMessage"
-    }
+    const NAME: &'static str = "grpc_build.MyMessage"
 }
-
 ```
-
 
 If the protobuf content is valid (worth [linting it](https://buf.build/docs/tour-4)), `grpc-build` will take care of the protobuf imports and it will also generate the `mod.rs` file to allow the compiler to find the generated code. This file will be placed inside the *output directory*.
 
@@ -60,23 +56,24 @@ The most convenient way of using `grpc_build` as a library is by taking advantag
 
 ```rust
 // build.rs
-use grpc_build::build;
+use grpc_build::Builder;
 
 fn main() {
-    build(
-        "protos",       // protobuf files input dir
-        "src/protogen", // output directory
-        true,           // --build_server=true
-        true,           // --build_client=true
-        true,           // --force
-    )
-    .unwrap();
+    Builder::new()
+        .build_client(true)
+        .build_server(true)
+        .build(
+            "protos",       // protobuf files input dir
+            "src/protogen", // output directory
+            true,           // --force
+        )
+        .unwrap();
 }
 ```
 
 If you want to set advanced compilation options (like an additional `#[derive]` for the generated types), use the `build_with_config` function, which exposes the underlying [`tonic_build::Builder`](https://docs.rs/tonic-build/0.5.0/tonic_build/struct.Builder.html).
 
-A more advanced usage is to use the `get_protos` and `refactor` functions yourself. The following example does the same as the example above
+A more advanced usage is to use the `get_protos` and `refactor` functions yourself. The following example does almost the same as the example above
 
 ```rust
 use grpc_build::base::{prepare_out_dir, get_protos, refactor};
