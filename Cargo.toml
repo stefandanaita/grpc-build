@@ -23,7 +23,6 @@ name = "grpc_build"
 
 [dependencies]
 prost = "0.10"
-prost-build = "0.10"
 anyhow = "1"
 tonic-build = "0.7"
 structopt = { version ="0.3", features = ["paw"] }
