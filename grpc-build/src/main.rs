@@ -1,5 +1,5 @@
 use anyhow::Result;
-use grpc_build::build;
+use grpc_build::Builder;
 
 #[derive(structopt::StructOpt)]
 pub enum Command {
@@ -31,6 +31,9 @@ fn main() -> Result<()> {
             build_client,
             build_server,
             force,
-        } => build(&in_dir, &out_dir, build_server, build_client, force),
+        } => Builder::new()
+            .build_client(build_client)
+            .build_server(build_server)
+            .build(in_dir, out_dir, force),
     }
 }

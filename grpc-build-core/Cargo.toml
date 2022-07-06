@@ -1,9 +1,9 @@
 [package]
-name = "grpc-build-derive"
+name = "grpc-build-core"
 version = "0.1.0"
 authors = ["Stefan Adrian Danaita <me@dsa.io>"]
-edition = "2021"
 license = "MIT"
+edition = "2021"
 
 readme = "../README.md"
 description = "gPRC compilation made easy"
@@ -13,9 +13,6 @@ repository = "https://github.com/stefandanaita/grpc-build"
 keywords = ["grpc", "tonic", "proto"]
 categories = ["development-tools"]
 
-[lib]
-proc-macro = true
-
 [dependencies]
-syn = "1"
-quote = "1"
+grpc-build-derive = { version = "0.1.0", path = "../grpc-build-derive" }
+

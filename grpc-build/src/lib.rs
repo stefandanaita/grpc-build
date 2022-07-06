@@ -1,133 +1,148 @@
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, Context, Ok, Result};
 use prost::Message;
+use prost_build::{protoc, protoc_include, Module};
 use prost_types::{FileDescriptorProto, FileDescriptorSet};
-use std::{
-    collections::HashMap,
-    path::{Path, PathBuf},
-};
-use tonic_build::Builder;
+use std::{collections::HashMap, path::Path, process::Command};
 
 pub mod base;
+mod builder;
 pub mod tree;
+pub use builder::Builder;
 
-pub fn build(
-    in_dir: &str,
-    out_dir: &str,
-    build_server: bool,
-    build_client: bool,
-    force: bool,
-) -> Result<()> {
-    build_with_config(in_dir, out_dir, build_server, build_client, force, |c| c)
-}
+impl Builder {
+    pub fn build(
+        self,
+        in_dir: impl AsRef<Path>,
+        out_dir: impl AsRef<Path>,
+        force: bool,
+    ) -> Result<(), anyhow::Error> {
+        if !force && out_dir.as_ref().exists() {
+            return Err(anyhow!(
+                "the output directory already exists: {}",
+                out_dir.as_ref().display()
+            ));
+        }
 
-pub fn build_with_config(
-    in_dir: &str,
-    out_dir: &str,
-    build_server: bool,
-    build_client: bool,
-    force: bool,
-    user_config: impl FnOnce(Builder) -> Builder,
-) -> Result<()> {
-    if !force && Path::new(out_dir).exists() {
-        return Err(anyhow!("the output directory already exists: {}", out_dir));
+        base::prepare_out_dir(out_dir.as_ref()).context("failed to prepare out dir")?;
+
+        self.compile(in_dir.as_ref(), out_dir.as_ref())
+            .context("failed to compile the protos")?;
+
+        base::refactor(out_dir).context("failed to refactor the protos")?;
+
+        Ok(())
     }
 
-    base::prepare_out_dir(out_dir).context("failed to prepare out dir")?;
+    fn compile(self, input_dir: &Path, out_dir: &Path) -> Result<(), anyhow::Error> {
+        let tmp = tempfile::Builder::new().prefix("grpc-build").tempdir()?;
+        let file_descriptor_path = tmp.path().join("grpc-descriptor-set");
 
-    compile(in_dir, out_dir, build_server, build_client, user_config)
-        .context("failed to compile the protos")?;
+        self.run_protoc(input_dir.as_ref(), &file_descriptor_path)?;
 
-    base::refactor(out_dir).context("failed to refactor the protos")?;
+        let buf = std::fs::read(&file_descriptor_path)?;
+        let file_descriptor_set =
+            FileDescriptorSet::decode(&*buf).context("invalid FileDescriptorSet")?;
 
-    Ok(())
-}
+        self.generate_services(out_dir, file_descriptor_set)
+    }
 
-fn compile(
-    input_dir: &str,
-    output_dir: &str,
-    server: bool,
-    client: bool,
-    user_config: impl FnOnce(Builder) -> Builder,
-) -> Result<(), anyhow::Error> {
-    let protos = crate::base::get_protos(input_dir).collect::<Vec<_>>();
+    fn run_protoc(
+        &self,
+        input_dir: &Path,
+        file_descriptor_path: &Path,
+    ) -> Result<(), anyhow::Error> {
+        let protos = crate::base::get_protos(input_dir).collect::<Vec<_>>();
 
-    let compile_includes: PathBuf = match Path::new(input_dir).parent() {
-        None => PathBuf::from("."),
-        Some(parent) => parent.to_path_buf(),
-    };
+        let compile_includes: &Path = match input_dir.parent() {
+            None => Path::new("."),
+            Some(parent) => parent,
+        };
 
-    // Steps:
-    // 1. compile protos along with the filedescriptor set in a temp folder
-    // 2. then we parse the filedescriptor set to obtain all message names
-    // 3. add the proc macro annotation to generate the `full_proto_name` function.
-    // 4. finally compile the protos using the annotation in the user-defined dir
+        let mut cmd = Command::new(protoc());
+        cmd.arg("--include_imports")
+            .arg("--include_source_info")
+            .arg("-o")
+            .arg(file_descriptor_path);
+        cmd.arg("-I").arg(compile_includes);
 
-    let tmp = tempfile::Builder::new().prefix("grpc-build").tempdir()?;
-    let file_descriptor_path = tmp.path().join("grpc-descriptor-set");
-    let tmp_dir = tempfile::Builder::new().prefix("grpc-build").tempdir()?;
+        cmd.arg("-I").arg(protoc_include());
 
-    let config = user_config(tonic_build::configure());
-    config
-        .clone()
-        .build_client(client)
-        .build_server(server)
-        // HACK: we compile it once to get the file_descriptor_set.
-        // But we just hide it in a temp folder.
-        // This is because tonci_build does not expose the `skip_protoc_run` fucntion
-        // like prost_build so we cannot skip it.
-        .out_dir(tmp_dir.path())
-        .file_descriptor_set_path(file_descriptor_path.clone())
-        .compile(&protos, &[compile_includes.clone()])?;
+        for arg in &self.protoc_args {
+            cmd.arg(arg);
+        }
 
-    let buf = std::fs::read(file_descriptor_path.clone())?;
-    let file_descriptor_set = FileDescriptorSet::decode(&*buf)
-        .map_err(|error| anyhow::anyhow!("invalid FileDescriptorSet: {}", error))?;
+        for proto in &protos {
+            cmd.arg(proto);
+        }
 
-    let mut config = tonic_build::configure();
+        cmd.output().context(
+            "failed to invoke protoc (hint: https://docs.rs/prost-build/#sourcing-protoc): {error}",
+        )?;
+        Ok(())
+    }
 
-    // Build mapping of <full_name, annotation>.
-    let annotations: HashMap<String, String> =
-        file_descriptor_set
+    fn generate_services(
+        mut self,
+        out_dir: &Path,
+        file_descriptor_set: FileDescriptorSet,
+    ) -> Result<(), anyhow::Error> {
+        let service_generator = self.tonic.service_generator();
+        self.prost.service_generator(service_generator);
+
+        let requests = file_descriptor_set
             .file
+            .into_iter()
+            .map(|descriptor| {
+                // Add our NamedMessage derive
+                for (name, annotation) in derive_named_messages(&descriptor) {
+                    self.prost.type_attribute(&name, annotation);
+                }
+
+                (
+                    Module::from_protobuf_package_name(descriptor.package()),
+                    descriptor,
+                )
+            })
+            .collect::<Vec<_>>();
+
+        let file_names = requests
             .iter()
-            .fold(HashMap::new(), |mut acc, descriptor| {
-                acc.extend(build_annotations_in_file(descriptor, descriptor.package()));
-                acc
-            });
+            .map(|(module, _)| (module.clone(), module.to_file_name_or("_")))
+            .collect::<HashMap<Module, String>>();
 
-    for (name, annotation) in &annotations {
-        config = config.type_attribute(&name, annotation);
+        let modules = self.prost.generate(requests)?;
+        for (module, content) in &modules {
+            let file_name = file_names
+                .get(module)
+                .expect("every module should have a filename");
+            let output_path = out_dir.join(file_name);
+
+            let previous_content = std::fs::read(&output_path);
+
+            // only write the file if the contents have changed
+            if previous_content
+                .map(|previous_content| previous_content != content.as_bytes())
+                .unwrap_or(true)
+            {
+                std::fs::write(output_path, content)?;
+            }
+        }
+
+        Ok(())
     }
-
-    config
-        .build_client(client)
-        .out_dir(output_dir)
-        .build_server(server)
-        .file_descriptor_set_path(file_descriptor_path.clone())
-        .compile(&protos, &[compile_includes])?;
-
-    Ok(())
 }
 
 /// Build annotations for the top-level messages in a file,
-fn build_annotations_in_file(
+fn derive_named_messages(
     descriptor: &FileDescriptorProto,
-    namespace: &str,
-) -> HashMap<String, String> {
-    descriptor
-        .message_type
-        .iter()
-        .map(|message| {
-            let full_name = fully_qualified_name(namespace, message.name());
-            (
-                full_name.clone(),
-                format!(
-                    "#[derive(::grpc_build_derive::FullyQualifiedName)] #[name = \"{}\"]",
-                    &full_name
-                ),
-            )
-        })
-        .collect()
+) -> impl Iterator<Item = (String, String)> + '_ {
+    let namespace = descriptor.package();
+    descriptor.message_type.iter().map(|message| {
+        let full_name = fully_qualified_name(namespace, message.name());
+        let derive =
+            format!("#[derive(::grpc_build_core::NamedMessage)] #[name = \"{full_name}\"]");
+        (full_name, derive)
+    })
 }
 
 fn fully_qualified_name(namespace: &str, name: &str) -> String {
@@ -135,10 +150,6 @@ fn fully_qualified_name(namespace: &str, name: &str) -> String {
     if namespace.is_empty() {
         name.into()
     } else {
-        let mut full_name = String::with_capacity(namespace.len() + 1 + name.len());
-        full_name.push_str(namespace);
-        full_name.push('.');
-        full_name.push_str(name);
-        full_name
+        format!("{namespace}.{name}")
     }
 }

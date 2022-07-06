@@ -2,15 +2,14 @@
 //! returning the full name of the message including the package namespace.
 
 use proc_macro::TokenStream;
-use syn::{spanned::Spanned, DeriveInput};
+use syn::{spanned::Spanned, DeriveInput, Lit, MetaNameValue};
 
-#[proc_macro_derive(FullyQualifiedName, attributes(name))]
+#[proc_macro_derive(NamedMessage, attributes(name))]
 pub fn fully_qualified_name(input: TokenStream) -> TokenStream {
-    // Parse the string representation
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
     match impl_fully_qualified_name(&ast) {
-        Ok(tokens) => tokens.into(),
+        Ok(tokens) => tokens,
         Err(err) => err.to_compile_error().into(),
     }
 }
@@ -24,42 +23,35 @@ fn impl_fully_qualified_name(ast: &syn::DeriveInput) -> syn::Result<TokenStream>
     };
 
     // search for #[name]
-    let mut name_attrs: Vec<_> = ast
+    let mut name_attrs = ast
         .attrs
         .iter()
-        .filter(|attr| attr.path.is_ident("name"))
-        .collect();
-
-    if name_attrs.is_empty() {
-        return Err(syn::Error::new(ast.span(), "missing #[name] attribute"));
-    }
+        .filter(|attr| attr.path.is_ident("name"));
 
     // Let's assume we only have one annotation
-    let attr = name_attrs.remove(0);
-    let meta = attr.parse_meta()?;
+    let meta = match name_attrs.next() {
+        Some(attr) => attr.parse_meta()?,
+        None => return Err(syn::Error::new(ast.span(), "missing #[name] attribute")),
+    };
 
     // #[name = "pbname"] should map to a NameValue
     //   path    Lit
-    let message_name = if let syn::Meta::NameValue(value) = meta {
-        if let syn::Lit::Str(name) = value.lit {
-            name
-        } else {
-            return Err(syn::Error::new(
-                value.lit.span(),
-                "message name MUST be a string",
-            ));
+    let message_name = match meta {
+        syn::Meta::NameValue(MetaNameValue {
+            lit: Lit::Str(name),
+            ..
+        }) => name,
+        syn::Meta::NameValue(MetaNameValue { lit, .. }) => {
+            return Err(syn::Error::new(lit.span(), "message name MUST be a string"))
         }
-    } else {
-        return Err(syn::Error::new(meta.span(), "missing #[name] attribute"));
+        meta => return Err(syn::Error::new(meta.span(), "missing #[name] attribute")),
     };
 
     let name = &ast.ident;
 
     Ok(quote::quote! {
-        impl #name {
-            pub fn full_proto_name() -> &'static str {
-                #message_name
-            }
+        impl ::grpc_build_core::NamedMessage for #name {
+            const NAME: &'static ::core::primitive::str = #message_name;
         }
     }
     .into())

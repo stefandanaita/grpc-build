@@ -2,6 +2,8 @@ mod protos {
     include!("protos/mod.rs");
 }
 
+use grpc_build_core::NamedMessage;
+
 use protos::grpc_build::{
     client::helloworld::greeter_client::GreeterClient, request::helloworld::HelloRequest,
     response::helloworld::HelloReply,
@@ -15,8 +17,5 @@ async fn foo(
 }
 
 fn main() {
-    assert_eq!(
-        HelloReply::full_proto_name(),
-        "grpc_build.response.helloworld.HelloReply"
-    );
+    assert_eq!(<HelloReply as NamedMessage>::NAME, "grpc_build.response.helloworld.HelloReply");
 }
