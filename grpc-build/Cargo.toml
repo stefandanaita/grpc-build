@@ -1,0 +1,38 @@
+[package]
+name = "grpc-build"
+version = "3.0.0-alpha0"
+authors = ["Stefan Adrian Danaita <me@dsa.io>"]
+license = "MIT"
+edition = "2021"
+
+readme = "../README.md"
+description = "gPRC compilation made easy"
+homepage = "https://github.com/stefandanaita/grpc-build"
+repository = "https://github.com/stefandanaita/grpc-build"
+
+keywords = ["grpc", "tonic", "proto"]
+categories = ["development-tools"]
+
+[[bin]]
+path = "src/main.rs"
+name = "grpc_build"
+
+[lib]
+path = "src/lib.rs"
+name = "grpc_build"
+
+[dependencies]
+prost = "0.10"
+anyhow = "1"
+tonic-build = "0.7"
+prost-build = "0.10"
+structopt = { version ="0.3", features = ["paw"] }
+paw = "1"
+walkdir = "2.3"
+tempfile = "3.3"
+prost-types = "0.10"
+
+[dev-dependencies]
+tonic = "0.7.1"
+trybuild = "1.0"
+grpc-build-core = { path = "../grpc-build-core"}
