@@ -62,40 +62,34 @@ fn main() {
     Builder::new()
         .build_client(true)
         .build_server(true)
-        .build(
-            "protos",       // protobuf files input dir
-            "src/protogen", // output directory
-            true,           // --force
-        )
+        .force(true)
+        .out_dir("src/protogen")
+        .build("protos")
         .unwrap();
 }
 ```
 
 If you want to set advanced compilation options (like an additional `#[derive]` for the generated types), use the `build_with_config` function, which exposes the underlying [`tonic_build::Builder`](https://docs.rs/tonic-build/0.5.0/tonic_build/struct.Builder.html).
 
-A more advanced usage is to use the `get_protos` and `refactor` functions yourself. The following example does almost the same as the example above
+A more advanced usage is to use the `get_protos` and `refactor` functions yourself. The following example does almost the same as the example above, except you don't get the `NamedMessage` traits auto derived
 
 ```rust
-use grpc_build::base::{prepare_out_dir, get_protos, refactor};
-use tonic_build::configure;
-
 fn main() {
     let proto_src_dir = "protos";
     let proto_out_dir = "src/protogen";
 
-    prepare_out_dir(proto_out_dir).unwrap();
+    let protos: Vec<_> = crate::base::get_protos(proto_src_dir).collect();
 
-    configure()
+    grpc_build::prepare_out_dir(proto_out_dir).unwrap();
+
+    tonic_build::configure()
         .out_dir(proto_out_dir)
         .build_server(true)
         .build_client(true)
-        .compile(
-            &get_protos(proto_src_dir).collect::<Vec<_>>(),
-            &["."]
-        )
+        .compile(&protos, &["."])
         .unwrap();
 
-    refactor(proto_out_dir).unwrap();
+    grpc_build::refactor(proto_out_dir).unwrap();
 }
 ```
 

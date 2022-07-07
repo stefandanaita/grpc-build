@@ -2,6 +2,12 @@
 pub trait NamedMessage {
     const NAME: &'static str;
 }
+
+// This derive is hidden since it doesn't do anything interesting.
+// It's general use is `#[derive(NamedMessage)] #[name = "{message_name}"]`, which is not
+// any more convenient than just implementing `NamedMessage` manually.
+// This is purely a derive for our own implementation detail with prost-build
+#[doc(hidden)]
 pub use grpc_build_derive::NamedMessage;
 
 impl NamedMessage for bool {
