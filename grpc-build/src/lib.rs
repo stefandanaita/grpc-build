@@ -13,19 +13,18 @@ impl Builder {
     pub fn build(
         self,
         in_dir: impl AsRef<Path>,
-        out_dir: impl AsRef<Path>,
-        force: bool,
     ) -> Result<(), anyhow::Error> {
-        if !force && out_dir.as_ref().exists() {
+        let out_dir = self.get_out_dir()?;
+        if !self.force && out_dir.exists() {
             return Err(anyhow!(
                 "the output directory already exists: {}",
-                out_dir.as_ref().display()
+                out_dir.display()
             ));
         }
 
-        base::prepare_out_dir(out_dir.as_ref()).context("failed to prepare out dir")?;
+        base::prepare_out_dir(&out_dir).context("failed to prepare out dir")?;
 
-        self.compile(in_dir.as_ref(), out_dir.as_ref())
+        self.compile(in_dir.as_ref(), &out_dir)
             .context("failed to compile the protos")?;
 
         base::refactor(out_dir).context("failed to refactor the protos")?;

@@ -34,6 +34,8 @@ fn main() -> Result<()> {
         } => Builder::new()
             .build_client(build_client)
             .build_server(build_server)
-            .build(in_dir, out_dir, force),
+            .force(force)
+            .out_dir(out_dir)
+            .build(in_dir),
     }
 }

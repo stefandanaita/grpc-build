@@ -38,6 +38,9 @@ pub fn prepare_out_dir(out_dir: impl AsRef<Path>) -> Result<()> {
 /// Get all the `.proto` files within the provided directory
 pub fn get_protos(input: impl AsRef<Path>) -> impl Iterator<Item = PathBuf> {
     fn inner(input: &Path) -> impl Iterator<Item = PathBuf> {
+        // TODO: maybe add this?
+        // println!("cargo:rerun-if-changed={}", input.display());
+
         WalkDir::new(input)
             .into_iter()
             .filter_map(|r| r.map_err(|err| println!("cargo:warning={:?}", err)).ok())

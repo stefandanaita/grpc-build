@@ -1,10 +1,12 @@
-use std::{ffi::OsString, path::Path};
+use std::{ffi::OsString, path::{Path, PathBuf}};
 
 /// A mirror of [`tonic_build::Builder`] for our own control
 pub struct Builder {
     pub(crate) tonic: tonic_build::Builder,
     pub(crate) prost: prost_build::Config,
     pub(crate) protoc_args: Vec<OsString>,
+    pub(crate) out_dir: Option<PathBuf>,
+    pub(crate) force: bool,
 }
 
 impl Default for Builder {
@@ -13,13 +15,33 @@ impl Default for Builder {
             tonic: tonic_build::configure(),
             prost: Default::default(),
             protoc_args: Default::default(),
+            out_dir: None,
+            force: false,
         }
     }
 }
 
 impl Builder {
+    pub(crate) fn get_out_dir(&self) -> Result<PathBuf, anyhow::Error> {
+        self.out_dir.clone().map(Ok).unwrap_or_else(|| {
+            std::env::var_os("OUT_DIR").ok_or_else(|| {
+                anyhow::anyhow!("could not determine $OUT_DIR")
+            }).map(Into::into)
+        })
+    }
+
     pub fn new() -> Self {
         Default::default()
+    }
+
+    pub fn force(mut self, force: bool) -> Self {
+        self.force = force;
+        self
+    }
+
+    pub fn out_dir(mut self, out_dir: impl AsRef<Path>) -> Self {
+        self.out_dir = Some(out_dir.as_ref().to_owned());
+        self
     }
 
     /// Enable or disable gRPC client code generation.
