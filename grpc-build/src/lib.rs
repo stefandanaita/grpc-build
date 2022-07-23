@@ -10,10 +10,7 @@ pub mod tree;
 pub use builder::Builder;
 
 impl Builder {
-    pub fn build(
-        self,
-        in_dir: impl AsRef<Path>,
-    ) -> Result<(), anyhow::Error> {
+    pub fn build(self, in_dir: impl AsRef<Path>) -> Result<(), anyhow::Error> {
         let out_dir = self.get_out_dir()?;
         if !self.force && out_dir.exists() {
             return Err(anyhow!(

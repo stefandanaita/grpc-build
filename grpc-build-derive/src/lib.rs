@@ -23,10 +23,7 @@ fn impl_fully_qualified_name(ast: &syn::DeriveInput) -> syn::Result<TokenStream>
     };
 
     // search for #[name]
-    let mut name_attrs = ast
-        .attrs
-        .iter()
-        .filter(|attr| attr.path.is_ident("name"));
+    let mut name_attrs = ast.attrs.iter().filter(|attr| attr.path.is_ident("name"));
 
     // Let's assume we only have one annotation
     let meta = match name_attrs.next() {

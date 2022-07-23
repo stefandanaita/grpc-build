@@ -1,4 +1,7 @@
-use std::{ffi::OsString, path::{Path, PathBuf}};
+use std::{
+    ffi::OsString,
+    path::{Path, PathBuf},
+};
 
 /// A mirror of [`tonic_build::Builder`] for our own control
 pub struct Builder {
@@ -24,9 +27,9 @@ impl Default for Builder {
 impl Builder {
     pub(crate) fn get_out_dir(&self) -> Result<PathBuf, anyhow::Error> {
         self.out_dir.clone().map(Ok).unwrap_or_else(|| {
-            std::env::var_os("OUT_DIR").ok_or_else(|| {
-                anyhow::anyhow!("could not determine $OUT_DIR")
-            }).map(Into::into)
+            std::env::var_os("OUT_DIR")
+                .ok_or_else(|| anyhow::anyhow!("could not determine $OUT_DIR"))
+                .map(Into::into)
         })
     }
 
