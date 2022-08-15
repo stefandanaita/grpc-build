@@ -42,12 +42,12 @@ impl Tree {
     /// and moving them there
     pub fn move_paths(&self, root: &Path, filename: OsString, output: PathBuf) -> Result<()> {
         if self.0.is_empty() {
-            std::fs::create_dir_all(root.join(&output).parent().unwrap())
+            fs_err::create_dir_all(root.join(&output).parent().unwrap())
                 .with_context(|| format!("could not create dir for file {}", output.display()))?;
 
             let from = root.join(filename.add("rs"));
             let to = root.join(output.with_extension("rs"));
-            std::fs::rename(&from, &to).with_context(|| {
+            fs_err::rename(&from, &to).with_context(|| {
                 format!("could not move {} to {}", from.display(), to.display())
             })?;
         } else {

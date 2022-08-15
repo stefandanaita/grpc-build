@@ -39,8 +39,7 @@ impl Builder {
         self.run_protoc(input_dir.as_ref(), &file_descriptor_path)
             .context("failed to run protoc")?;
 
-        let buf =
-            std::fs::read(&file_descriptor_path).context("failed to read file descriptors")?;
+        let buf = fs_err::read(&file_descriptor_path).context("failed to read file descriptors")?;
         let file_descriptor_set =
             FileDescriptorSet::decode(&*buf).context("invalid FileDescriptorSet")?;
 
@@ -64,12 +63,12 @@ impl Builder {
         let mut cmd = Command::new(protoc_from_env());
         cmd.arg("--include_imports")
             .arg("--include_source_info")
-            .arg("-o")
+            .arg("--descriptor_set_out")
             .arg(file_descriptor_path);
-        cmd.arg("-I").arg(compile_includes);
+        cmd.arg("--proto_path").arg(compile_includes);
 
         if let Some(include) = protoc_include_from_env() {
-            cmd.arg("-I").arg(include);
+            cmd.arg("--proto_path").arg(include);
         }
 
         for arg in &self.protoc_args {
@@ -122,14 +121,14 @@ impl Builder {
                 .expect("every module should have a filename");
             let output_path = out_dir.join(file_name);
 
-            let previous_content = std::fs::read(&output_path);
+            let previous_content = fs_err::read(&output_path);
 
             // only write the file if the contents have changed
             if previous_content
                 .map(|previous_content| previous_content != content.as_bytes())
                 .unwrap_or(true)
             {
-                std::fs::write(output_path, content)?;
+                fs_err::write(output_path, content)?;
             }
         }
 
