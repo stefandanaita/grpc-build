@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Context, Ok, Result};
 use prost::Message;
-use prost_build::{protoc, protoc_include, Module};
+use prost_build::{protoc_from_env, protoc_include_from_env, Module};
 use prost_types::{FileDescriptorProto, FileDescriptorSet};
 use std::{collections::HashMap, path::Path, process::Command};
 
@@ -54,14 +54,16 @@ impl Builder {
             Some(parent) => parent,
         };
 
-        let mut cmd = Command::new(protoc());
+        let mut cmd = Command::new(protoc_from_env());
         cmd.arg("--include_imports")
             .arg("--include_source_info")
             .arg("-o")
             .arg(file_descriptor_path);
         cmd.arg("-I").arg(compile_includes);
 
-        cmd.arg("-I").arg(protoc_include());
+        if let Some(include) = protoc_include_from_env() {
+            cmd.arg("-I").arg(include);
+        }
 
         for arg in &self.protoc_args {
             cmd.arg(arg);
