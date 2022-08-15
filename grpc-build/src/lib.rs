@@ -30,16 +30,23 @@ impl Builder {
     }
 
     fn compile(self, input_dir: &Path, out_dir: &Path) -> Result<(), anyhow::Error> {
-        let tmp = tempfile::Builder::new().prefix("grpc-build").tempdir()?;
+        let tmp = tempfile::Builder::new()
+            .prefix("grpc-build")
+            .tempdir()
+            .context("failed to get tempdir")?;
         let file_descriptor_path = tmp.path().join("grpc-descriptor-set");
 
-        self.run_protoc(input_dir.as_ref(), &file_descriptor_path)?;
+        self.run_protoc(input_dir.as_ref(), &file_descriptor_path)
+            .context("failed to run protoc")?;
 
-        let buf = std::fs::read(&file_descriptor_path)?;
+        let buf =
+            std::fs::read(&file_descriptor_path).context("failed to read file descriptors")?;
         let file_descriptor_set =
             FileDescriptorSet::decode(&*buf).context("invalid FileDescriptorSet")?;
 
         self.generate_services(out_dir, file_descriptor_set)
+            .context("failed to generic tonic services")?;
+        Ok(())
     }
 
     fn run_protoc(
