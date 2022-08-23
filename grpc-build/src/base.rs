@@ -15,7 +15,7 @@ use walkdir::WalkDir;
 pub fn prepare_out_dir(out_dir: impl AsRef<Path>) -> Result<()> {
     fn inner(out_dir: &Path) -> Result<()> {
         if out_dir.exists() {
-            std::fs::remove_dir_all(out_dir).with_context(|| {
+            fs_err::remove_dir_all(out_dir).with_context(|| {
                 format!(
                     "could not remove the output directory: {}",
                     out_dir.display()
@@ -23,7 +23,7 @@ pub fn prepare_out_dir(out_dir: impl AsRef<Path>) -> Result<()> {
             })?;
         }
 
-        std::fs::create_dir_all(out_dir).with_context(|| {
+        fs_err::create_dir_all(out_dir).with_context(|| {
             format!(
                 "could not create the output directory: {}",
                 out_dir.display()
@@ -56,7 +56,7 @@ pub fn get_protos(input: impl AsRef<Path>) -> impl Iterator<Item = PathBuf> {
 /// structure and generates the expected mod file output
 pub fn refactor(output: impl AsRef<Path>) -> Result<()> {
     fn inner(output: &Path) -> Result<()> {
-        let tree: crate::tree::Tree = std::fs::read_dir(output)?
+        let tree: crate::tree::Tree = fs_err::read_dir(output)?
             .filter_map(|r| r.map_err(|err| println!("cargo:warning={:?}", err)).ok())
             .filter(|e| e.path().extension().map_or(false, |e| e == "rs"))
             .filter(|e| !e.path().ends_with("mod.rs"))
@@ -64,7 +64,7 @@ pub fn refactor(output: impl AsRef<Path>) -> Result<()> {
             .collect();
 
         tree.move_paths(output, OsString::new(), PathBuf::new())?;
-        std::fs::write(output.join("mod.rs"), tree.to_string())?;
+        fs_err::write(output.join("mod.rs"), tree.to_string())?;
 
         Command::new("rustfmt")
             .arg(output.join("mod.rs"))

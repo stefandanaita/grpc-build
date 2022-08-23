@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Context, Ok, Result};
 use prost::Message;
-use prost_build::{protoc, protoc_include, Module};
+use prost_build::{protoc_from_env, protoc_include_from_env, Module};
 use prost_types::{FileDescriptorProto, FileDescriptorSet};
 use std::{collections::HashMap, path::Path, process::Command};
 
@@ -30,16 +30,22 @@ impl Builder {
     }
 
     fn compile(self, input_dir: &Path, out_dir: &Path) -> Result<(), anyhow::Error> {
-        let tmp = tempfile::Builder::new().prefix("grpc-build").tempdir()?;
+        let tmp = tempfile::Builder::new()
+            .prefix("grpc-build")
+            .tempdir()
+            .context("failed to get tempdir")?;
         let file_descriptor_path = tmp.path().join("grpc-descriptor-set");
 
-        self.run_protoc(input_dir.as_ref(), &file_descriptor_path)?;
+        self.run_protoc(input_dir.as_ref(), &file_descriptor_path)
+            .context("failed to run protoc")?;
 
-        let buf = std::fs::read(&file_descriptor_path)?;
+        let buf = fs_err::read(&file_descriptor_path).context("failed to read file descriptors")?;
         let file_descriptor_set =
             FileDescriptorSet::decode(&*buf).context("invalid FileDescriptorSet")?;
 
         self.generate_services(out_dir, file_descriptor_set)
+            .context("failed to generic tonic services")?;
+        Ok(())
     }
 
     fn run_protoc(
@@ -54,14 +60,16 @@ impl Builder {
             Some(parent) => parent,
         };
 
-        let mut cmd = Command::new(protoc());
+        let mut cmd = Command::new(protoc_from_env());
         cmd.arg("--include_imports")
             .arg("--include_source_info")
-            .arg("-o")
+            .arg("--descriptor_set_out")
             .arg(file_descriptor_path);
-        cmd.arg("-I").arg(compile_includes);
+        cmd.arg("--proto_path").arg(compile_includes);
 
-        cmd.arg("-I").arg(protoc_include());
+        if let Some(include) = protoc_include_from_env() {
+            cmd.arg("--proto_path").arg(include);
+        }
 
         for arg in &self.protoc_args {
             cmd.arg(arg);
@@ -113,14 +121,14 @@ impl Builder {
                 .expect("every module should have a filename");
             let output_path = out_dir.join(file_name);
 
-            let previous_content = std::fs::read(&output_path);
+            let previous_content = fs_err::read(&output_path);
 
             // only write the file if the contents have changed
             if previous_content
                 .map(|previous_content| previous_content != content.as_bytes())
                 .unwrap_or(true)
             {
-                std::fs::write(output_path, content)?;
+                fs_err::write(output_path, content)?;
             }
         }
 

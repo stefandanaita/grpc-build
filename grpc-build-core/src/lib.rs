@@ -137,9 +137,6 @@ impl NamedMessage for prost_types::Struct {
 impl NamedMessage for prost_types::Timestamp {
     const NAME: &'static str = "google.protobuf.Timestamp";
 }
-impl NamedMessage for prost_types::TimestampOutOfSystemRangeError {
-    const NAME: &'static str = "google.protobuf.TimestampOutOfSystemRangeError";
-}
 impl NamedMessage for prost_types::Type {
     const NAME: &'static str = "google.protobuf.Type";
 }
