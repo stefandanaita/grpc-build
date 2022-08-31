@@ -79,9 +79,17 @@ impl Builder {
             cmd.arg(proto);
         }
 
-        cmd.output().context(
+        eprintln!("Running {cmd:?}");
+
+        let out = cmd.output().context(
             "failed to invoke protoc (hint: https://docs.rs/prost-build/#sourcing-protoc)",
         )?;
+
+        eprintln!(
+            "---protoc stderr---\n{}\n------",
+            String::from_utf8_lossy(&out.stderr).trim()
+        );
+
         Ok(())
     }
 
