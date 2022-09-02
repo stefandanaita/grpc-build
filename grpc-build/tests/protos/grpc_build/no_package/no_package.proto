@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+// A message with no package defined.
+message NoPackageMessage {
+  string name = 1;
+}

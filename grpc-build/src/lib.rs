@@ -111,7 +111,12 @@ impl Builder {
 
         let file_names = requests
             .iter()
-            .map(|(module, _)| (module.clone(), module.to_file_name_or("_")))
+            .map(|(module, _)| {
+                (
+                    module.clone(),
+                    module.to_file_name_or(self.default_module_name.as_deref().unwrap_or("_")),
+                )
+            })
             .collect::<HashMap<Module, String>>();
 
         let modules = self.prost.generate(requests)?;
