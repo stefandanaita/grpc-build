@@ -49,6 +49,7 @@ impl Builder {
         self
     }
 
+    /// Configures what filename protobufs with no package definition are written to.
     pub fn default_module_name(mut self, name: impl AsRef<str>) -> Self {
         self.default_module_name = Some(name.as_ref().to_string());
         self
