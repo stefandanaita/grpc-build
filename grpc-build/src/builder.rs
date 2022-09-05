@@ -10,6 +10,7 @@ pub struct Builder {
     pub(crate) protoc_args: Vec<OsString>,
     pub(crate) out_dir: Option<PathBuf>,
     pub(crate) force: bool,
+    pub(crate) default_module_name: Option<String>,
 }
 
 impl Default for Builder {
@@ -20,6 +21,7 @@ impl Default for Builder {
             protoc_args: Default::default(),
             out_dir: None,
             force: false,
+            default_module_name: None,
         }
     }
 }
@@ -44,6 +46,12 @@ impl Builder {
 
     pub fn out_dir(mut self, out_dir: impl AsRef<Path>) -> Self {
         self.out_dir = Some(out_dir.as_ref().to_owned());
+        self
+    }
+
+    /// Configures what filename protobufs with no package definition are written to.
+    pub fn default_module_name(mut self, name: impl AsRef<str>) -> Self {
+        self.default_module_name = Some(name.as_ref().to_string());
         self
     }
 
