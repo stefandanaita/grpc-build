@@ -47,6 +47,8 @@ impl Builder {
     }
 
     /// Follow symbolic links when finding .proto files.
+    ///
+    /// This defaults to `false`.
     pub fn follow_links(mut self, follow_links: bool) -> Self {
         self.follow_links = follow_links;
         self
