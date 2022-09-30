@@ -55,6 +55,10 @@ impl Builder {
     ) -> Result<(), anyhow::Error> {
         let protos = crate::base::get_protos(input_dir).collect::<Vec<_>>();
 
+        if protos.is_empty() {
+            return Err(anyhow!("no .proto files found in {}", input_dir.display()));
+        }
+
         let compile_includes: &Path = match input_dir.parent() {
             None => Path::new("."),
             Some(parent) => parent,
@@ -81,14 +85,21 @@ impl Builder {
 
         eprintln!("Running {cmd:?}");
 
-        let out = cmd.output().context(
+        let output = cmd.output().context(
             "failed to invoke protoc (hint: https://docs.rs/prost-build/#sourcing-protoc)",
         )?;
 
-        eprintln!(
-            "---protoc stderr---\n{}\n------",
-            String::from_utf8_lossy(&out.stderr).trim()
-        );
+        if !output.status.success() {
+            eprintln!(
+                "---protoc stderr---\n{}\n------",
+                String::from_utf8_lossy(&output.stderr).trim()
+            );
+
+            return Err(anyhow!(
+                "protoc returned a non-zero exit status: {}",
+                output.status,
+            ));
+        }
 
         Ok(())
     }
