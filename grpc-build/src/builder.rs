@@ -11,6 +11,7 @@ pub struct Builder {
     pub(crate) out_dir: Option<PathBuf>,
     pub(crate) force: bool,
     pub(crate) default_module_name: Option<String>,
+    pub(crate) follow_links: bool,
 }
 
 impl Default for Builder {
@@ -22,6 +23,7 @@ impl Default for Builder {
             out_dir: None,
             force: false,
             default_module_name: None,
+            follow_links: false,
         }
     }
 }
@@ -41,6 +43,12 @@ impl Builder {
 
     pub fn force(mut self, force: bool) -> Self {
         self.force = force;
+        self
+    }
+
+    /// Follow symbolic links when finding .proto files.
+    pub fn follow_links(mut self, follow_links: bool) -> Self {
+        self.follow_links = follow_links;
         self
     }
 
