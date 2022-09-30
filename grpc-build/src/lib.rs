@@ -79,9 +79,17 @@ impl Builder {
             cmd.arg(proto);
         }
 
-        cmd.output().context(
+        eprintln!("Running {cmd:?}");
+
+        let out = cmd.output().context(
             "failed to invoke protoc (hint: https://docs.rs/prost-build/#sourcing-protoc)",
         )?;
+
+        eprintln!(
+            "---protoc stderr---\n{}\n------",
+            String::from_utf8_lossy(&out.stderr).trim()
+        );
+
         Ok(())
     }
 
@@ -111,7 +119,12 @@ impl Builder {
 
         let file_names = requests
             .iter()
-            .map(|(module, _)| (module.clone(), module.to_file_name_or("_")))
+            .map(|(module, _)| {
+                (
+                    module.clone(),
+                    module.to_file_name_or(self.default_module_name.as_deref().unwrap_or("_")),
+                )
+            })
             .collect::<HashMap<Module, String>>();
 
         let modules = self.prost.generate(requests)?;

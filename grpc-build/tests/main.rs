@@ -7,6 +7,7 @@ fn build() {
         .build_server(true)
         .force(true)
         .out_dir("tests/compile_test/protos")
+        .default_module_name("some_default")
         .build("tests/protos/grpc_build")
         .unwrap();
 
