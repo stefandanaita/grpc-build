@@ -36,19 +36,20 @@ pub fn prepare_out_dir(out_dir: impl AsRef<Path>) -> Result<()> {
 }
 
 /// Get all the `.proto` files within the provided directory
-pub fn get_protos(input: impl AsRef<Path>) -> impl Iterator<Item = PathBuf> {
-    fn inner(input: &Path) -> impl Iterator<Item = PathBuf> {
+pub fn get_protos(input: impl AsRef<Path>, follow_links: bool) -> impl Iterator<Item = PathBuf> {
+    fn inner(input: &Path, follow_links: bool) -> impl Iterator<Item = PathBuf> {
         // TODO: maybe add this?
         // println!("cargo:rerun-if-changed={}", input.display());
 
         WalkDir::new(input)
+            .follow_links(follow_links)
             .into_iter()
             .filter_map(|r| r.map_err(|err| println!("cargo:warning={:?}", err)).ok())
             .filter(|e| e.file_type().is_file())
             .filter(|e| e.path().extension().map_or(false, |e| e == "proto"))
             .map(|e| e.path().to_path_buf())
     }
-    inner(input.as_ref())
+    inner(input.as_ref(), follow_links)
 }
 
 /// [`tonic_build::Builder::compile`] outputs all the rust files into the output dir all at the top level.

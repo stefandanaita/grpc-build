@@ -53,7 +53,7 @@ impl Builder {
         input_dir: &Path,
         file_descriptor_path: &Path,
     ) -> Result<(), anyhow::Error> {
-        let protos = crate::base::get_protos(input_dir).collect::<Vec<_>>();
+        let protos = crate::base::get_protos(input_dir, self.follow_links).collect::<Vec<_>>();
 
         if protos.is_empty() {
             return Err(anyhow!("no .proto files found in {}", input_dir.display()));
