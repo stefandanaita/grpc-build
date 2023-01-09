@@ -26,7 +26,7 @@ prost = "0.11"
 anyhow = "1"
 tonic-build = "0.8"
 prost-build = "0.11"
-structopt = { version ="0.3", features = ["paw"] }
+clap = { version = "4.0.32", features = ["derive"] }
 paw = "1"
 walkdir = "2.3"
 tempfile = "3.3"
