@@ -1,8 +1,10 @@
 mod protos {
+    pub const FILE_DESCRIPTOR_SET: &[u8] = include_bytes!("protos/descriptor.bin");
     include!("protos/mod.rs");
 }
 
 use grpc_build_core::NamedMessage;
+use prost::Message;
 
 use protos::grpc_build::{
     client::helloworld::greeter_client::GreeterClient, request::helloworld::HelloRequest,
@@ -17,5 +19,9 @@ async fn foo(
 }
 
 fn main() {
-    assert_eq!(<HelloReply as NamedMessage>::NAME, "grpc_build.response.helloworld.HelloReply");
+    assert_eq!(
+        <HelloReply as NamedMessage>::NAME,
+        "grpc_build.response.helloworld.HelloReply"
+    );
+    prost_types::FileDescriptorSet::decode(protos::FILE_DESCRIPTOR_SET).unwrap();
 }

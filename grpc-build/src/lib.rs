@@ -21,25 +21,40 @@ impl Builder {
 
         base::prepare_out_dir(&out_dir).context("failed to prepare out dir")?;
 
-        self.compile(in_dir.as_ref(), &out_dir)
-            .context("failed to compile the protos")?;
+        match self.file_descriptor_set_path.clone() {
+            Some(file_descriptor_path) => {
+                self.compile(in_dir.as_ref(), &out_dir, &file_descriptor_path)
+                    .context("failed to compile the protos")?;
+            }
+            None => {
+                // Create a temporary directory to host the file descriptor set.
+                // The directory gets cleaned when compilation ends.
+                let tmp = tempfile::Builder::new()
+                    .prefix("grpc-build")
+                    .tempdir()
+                    .context("failed to get tempdir")?;
+                let file_descriptor_path = tmp.path().join("grpc-descriptor-set");
+
+                self.compile(in_dir.as_ref(), &out_dir, &file_descriptor_path)
+                    .context("failed to compile the protos")?;
+            }
+        }
 
         base::refactor(out_dir).context("failed to refactor the protos")?;
 
         Ok(())
     }
 
-    fn compile(self, input_dir: &Path, out_dir: &Path) -> Result<(), anyhow::Error> {
-        let tmp = tempfile::Builder::new()
-            .prefix("grpc-build")
-            .tempdir()
-            .context("failed to get tempdir")?;
-        let file_descriptor_path = tmp.path().join("grpc-descriptor-set");
-
-        self.run_protoc(input_dir.as_ref(), &file_descriptor_path)
+    fn compile(
+        self,
+        input_dir: &Path,
+        out_dir: &Path,
+        file_descriptor_path: &Path,
+    ) -> Result<(), anyhow::Error> {
+        self.run_protoc(input_dir.as_ref(), file_descriptor_path)
             .context("failed to run protoc")?;
 
-        let buf = fs_err::read(&file_descriptor_path).context("failed to read file descriptors")?;
+        let buf = fs_err::read(file_descriptor_path).context("failed to read file descriptors")?;
         let file_descriptor_set =
             FileDescriptorSet::decode(&*buf).context("invalid FileDescriptorSet")?;
 
