@@ -34,7 +34,7 @@ impl Tree {
     /// Given a file path that is `.` separated, it loads it into the tree.
     pub fn insert_path(mut self: &mut Self, path: PathBuf) {
         for comp in path.file_stem().unwrap().to_str().unwrap().split('.') {
-            self = (*self).0.entry(PathBuf::from(comp)).or_default()
+            self = self.0.entry(PathBuf::from(comp)).or_default()
         }
     }
 
