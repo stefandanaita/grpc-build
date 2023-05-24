@@ -1,6 +1,6 @@
 [package]
 name = "grpc-build"
-version = "4.2.0"
+version = "4.3.0"
 authors = ["Stefan Adrian Danaita <me@dsa.io>"]
 license = "MIT"
 edition = "2021"
