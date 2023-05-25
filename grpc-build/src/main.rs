@@ -1,28 +1,29 @@
 use anyhow::Result;
+use clap::Parser;
 use grpc_build::Builder;
 
-#[derive(structopt::StructOpt)]
+#[derive(Parser)]
 pub enum Command {
     Build {
-        #[structopt(long)]
+        #[arg(long)]
         in_dir: String,
 
-        #[structopt(long)]
+        #[arg(long)]
         out_dir: String,
 
-        #[structopt(short = "client", long = "build_client")]
+        #[arg(short = 'c', long = "build_client")]
         build_client: bool,
 
-        #[structopt(short = "server", long = "build_server")]
+        #[arg(short = 's', long = "build_server")]
         build_server: bool,
 
-        #[structopt(short = "force", long = "force")]
+        #[arg(short = 'f', long = "force")]
         force: bool,
     },
 }
 
 fn main() -> Result<()> {
-    let command = <Command as paw::ParseArgs>::parse_args()?;
+    let command = Command::try_parse()?;
 
     match command {
         Command::Build {
