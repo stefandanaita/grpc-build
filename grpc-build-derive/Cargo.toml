@@ -1,6 +1,6 @@
 [package]
 name = "grpc-build-derive"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Stefan Adrian Danaita <me@dsa.io>"]
 edition = "2021"
 license = "MIT"

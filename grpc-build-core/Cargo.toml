@@ -1,6 +1,6 @@
 [package]
 name = "grpc-build-core"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Stefan Adrian Danaita <me@dsa.io>"]
 license = "MIT"
 edition = "2021"
@@ -14,6 +14,6 @@ keywords = ["grpc", "tonic", "proto"]
 categories = ["development-tools"]
 
 [dependencies]
-grpc-build-derive = { version = "0.2.0", path = "../grpc-build-derive" }
+grpc-build-derive = { version = "0.3.0", path = "../grpc-build-derive" }
 prost-types = "0.12"
 bytes = "1"
