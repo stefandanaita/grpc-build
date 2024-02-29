@@ -1,3 +1,5 @@
 [workspace]
 
 members = ["grpc-build", "grpc-build-derive", "grpc-build-core"]
+
+resolver = "2"
