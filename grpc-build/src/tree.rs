@@ -10,6 +10,7 @@ use std::{
 };
 
 use anyhow::{Context, Result};
+use fs_err::OpenOptions;
 
 #[derive(Default, Debug, PartialEq)]
 pub struct Tree(pub(crate) HashMap<PathBuf, Tree>);
@@ -30,12 +31,21 @@ impl FromIterator<PathBuf> for Tree {
     }
 }
 
+
 impl Tree {
     /// Given a file path that is `.` separated, it loads it into the tree.
     pub fn insert_path(mut self: &mut Self, path: PathBuf) {
         for comp in path.file_stem().unwrap().to_str().unwrap().split('.') {
             self = self.0.entry(PathBuf::from(comp)).or_default()
         }
+    }
+
+    pub fn root_mod(&self) -> String {
+        let mut module = String::from("// Module generated with `grpc_build`\n");
+        for (k, _) in &self.0 {
+            module.push_str(&format!("pub mod {};\n", k.display()));
+        }
+        module
     }
 
     /// Loop through the tree, determining where all the files should be
@@ -54,6 +64,48 @@ impl Tree {
             for (k, tree) in &self.0 {
                 tree.move_paths(root, filename.add(k), output.join(k))?;
             }
+
+            let from = root.join(filename.add("rs"));
+                
+            let mut module = String::from("// Module generated with `grpc_build`\n");
+            for (k, _) in &self.0 {
+                module.push_str(&format!("pub mod {};\n", k.display()));
+            }
+
+            // if file exists means we have one file here
+            let to = root.join(output.with_extension("rs"));
+            // if there is a proto file we need to prepend the module to the file and move it    
+            if fs_err::metadata(&from).map(|m| m.is_file()).unwrap_or(false) {
+                fs_err::write(&to, module).with_context(|| {
+                    format!("could not write to file {}", to.display())
+                })?;
+
+                let mut module_file = OpenOptions::new()
+                    .create_new(false)
+                    .write(true)
+                    .append(true)
+                    .open(&to)
+                    .with_context(|| {format!("could not open file {}", to.display())})?;
+
+                // Append the file
+                let mut contents = OpenOptions::new().read(true).write(true).open(&from).with_context(|| {
+                    format!("could not open file {}", from.display())
+                })?;
+
+                std::io::copy(&mut contents, &mut module_file).with_context(|| {
+                    format!("could not copy contents from {} to {}", from.display(), to.display())
+                })?;
+
+                fs_err::remove_file(&from).with_context(|| {
+                    format!("could not remove file {}", from.display())
+                })?;
+            } else {
+                let _ = fs_err::write(&to, module).with_context(|| {
+                    format!("could not write to file {}", to.display())
+                });
+            }
+
+
         }
         Ok(())
     }

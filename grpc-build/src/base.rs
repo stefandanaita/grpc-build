@@ -65,7 +65,7 @@ pub fn refactor(output: impl AsRef<Path>) -> Result<()> {
             .collect();
 
         tree.move_paths(output, OsString::new(), PathBuf::new())?;
-        fs_err::write(output.join("mod.rs"), tree.to_string())?;
+        fs_err::write(output.join("mod.rs"), tree.root_mod())?;
 
         Command::new("rustfmt")
             .arg(output.join("mod.rs"))
