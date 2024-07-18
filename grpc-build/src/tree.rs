@@ -47,7 +47,7 @@ impl Tree {
             module.push_str(&format!("pub mod {};\n", k.display()));
         }
 
-        module.push_str("\n");
+        module.push('\n');
         module
     }
 
@@ -136,7 +136,7 @@ fn merge_file_into(from: &PathBuf, to: &PathBuf) -> Result<(), anyhow::Error> {
         )
     })?;
 
-    fs_err::remove_file(&from)
+    fs_err::remove_file(from)
         .with_context(|| format!("could not remove file {}", from.display()))?;
     Ok(())
 }
