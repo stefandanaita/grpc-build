@@ -39,7 +39,6 @@ impl Tree {
         }
     }
 
-
     /// Generates the module at the root level of the tree
     pub fn generate_module(&self) -> String {
         let mut module = String::from("// Module generated with `grpc_build`\n");
@@ -68,20 +67,13 @@ impl Tree {
             for (k, tree) in &self.0 {
                 tree.move_paths(root, filename.add(k), output.join(k))?;
             }
-
-            eprintln!(
-                "Root is {}, filename {} output {}",
-                root.display(),
-                filename.clone().into_string().unwrap(),
-                output.display()
-            );
+            
             if !filename.is_empty() {
                 self.create_module_file(root, filename, output)?;
             }
         }
         Ok(())
     }
-
 
     fn create_module_file(
         &self,
@@ -94,7 +86,7 @@ impl Tree {
         let final_dest_name = root.join(output.with_extension("rs"));
 
         // Write a temporary file with the module contents
-        let modules = self.generate_module();        
+        let modules = self.generate_module();
         fs_err::write(&dest_tmp_file_name, modules)
             .with_context(|| format!("could not write to file {}", final_dest_name.display()))?;
 
