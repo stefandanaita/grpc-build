@@ -67,7 +67,7 @@ impl Tree {
             for (k, tree) in &self.0 {
                 tree.move_paths(root, filename.add(k), output.join(k))?;
             }
-            
+
             if !filename.is_empty() {
                 self.create_module_file(root, filename, output)?;
             }
@@ -82,7 +82,7 @@ impl Tree {
         output: PathBuf,
     ) -> Result<(), anyhow::Error> {
         let maybe_proto_file_name = root.join(filename.add("rs"));
-        let dest_tmp_file_name = root.join(output.with_extension("tmp.rs"));
+        let dest_tmp_file_name = root.join(output.with_extension("tmp"));
         let final_dest_name = root.join(output.with_extension("rs"));
 
         // Write a temporary file with the module contents
