@@ -65,7 +65,7 @@ pub fn refactor(output: impl AsRef<Path>) -> Result<()> {
             .collect();
 
         tree.move_paths(output, OsString::new(), PathBuf::new())?;
-        fs_err::write(output.join("mod.rs"), tree.to_string())?;
+        fs_err::write(output.join("mod.rs"), tree.generate_module())?;
 
         Command::new("rustfmt")
             .arg(output.join("mod.rs"))
@@ -75,4 +75,71 @@ pub fn refactor(output: impl AsRef<Path>) -> Result<()> {
         Ok(())
     }
     inner(output.as_ref())
+}
+
+#[cfg(test)]
+mod test {
+    use super::refactor;
+
+    #[test]
+    fn refactor_test_moves_files_to_correct_place() {
+        let files = vec![
+            "root.pak.a1.rs",
+            "root.pak.a2.rs",
+            "root.pak.rs",
+            "root.now.deeply.nested.rs",
+            "root.rs",
+            "other.rs",
+        ];
+
+        let temp_dir = tempfile::tempdir().unwrap();
+        let temp_dir_path = temp_dir.path().to_path_buf();
+        // create files
+        for file in &files {
+            let path = temp_dir_path.join(file);
+            std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+            std::fs::File::create(path.clone()).unwrap();
+            // write file name as its content
+            std::fs::write(path.clone(), format!("// {} contents", file)).unwrap();
+        }
+
+        let expected_file_contents = vec![
+            ("root/pak/a1.rs", vec!["// root.pak.a1.rs contents"]),
+            ("root/pak/a2.rs", vec!["// root.pak.a2.rs content"]),
+            (
+                "root/pak.rs",
+                vec!["pub mod a1;", "pub mod a2;", "// root.pak.rs contents"],
+            ),
+            ("root/now.rs", vec!["pub mod deeply;"]),
+            ("root/now/deeply.rs", vec!["pub mod nested;"]),
+            (
+                "root/now/deeply/nested.rs",
+                vec!["// root.now.deeply.nested.rs contents"],
+            ),
+            (
+                "root.rs",
+                vec!["pub mod pak;", "pub mod now;", "// root.rs contents"],
+            ),
+            ("mod.rs", vec!["pub mod other;", "pub mod root;"]),
+            ("other.rs", vec!["// other.rs contents"]),
+        ];
+
+        // Act
+        refactor(&temp_dir_path).unwrap();
+
+        // check if files are moved and contents are correct
+        for (file, contents) in &expected_file_contents {
+            let path = temp_dir_path.join(file);
+            assert!(path.exists());
+            let content = std::fs::read_to_string(path).unwrap();
+            for line in contents {
+                assert!(
+                    content.contains(line),
+                    "{} does not contain {}",
+                    content,
+                    line
+                );
+            }
+        }
+    }
 }
