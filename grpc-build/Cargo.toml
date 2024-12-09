@@ -1,6 +1,6 @@
 [package]
 name = "grpc-build"
-version = "6.1.1"
+version = "7.0.0"
 authors = ["Stefan Adrian Danaita <me@dsa.io>"]
 license = "MIT"
 edition = "2021"
@@ -22,18 +22,18 @@ path = "src/lib.rs"
 name = "grpc_build"
 
 [dependencies]
-prost = "0.12"
+prost = "0.13"
 anyhow = "1"
-tonic-build = "0.11"
-prost-build = "0.12"
+tonic-build = "0.12"
+prost-build = "0.13"
 clap = { version = "4.0.32", features = ["derive"] }
 paw = "1"
 walkdir = "2.3"
 tempfile = "3.3"
-prost-types = "0.12"
+prost-types = "0.13"
 fs-err = "2.7"
 
 [dev-dependencies]
-tonic = "0.11"
+tonic = "0.12"
 trybuild = "1.0"
-grpc-build-core = { path = "../grpc-build-core"}
+grpc-build-core = { path = "../grpc-build-core" }
