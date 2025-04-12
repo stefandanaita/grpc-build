@@ -17,5 +17,5 @@ categories = ["development-tools"]
 proc-macro = true
 
 [dependencies]
-syn = "1"
+syn = "2"
 quote = "1"
