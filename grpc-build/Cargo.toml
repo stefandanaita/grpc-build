@@ -1,9 +1,9 @@
 [package]
 name = "grpc-build"
-version = "7.0.0"
+version = "8.0.0"
 authors = ["Stefan Adrian Danaita <me@dsa.io>"]
 license = "MIT"
-edition = "2021"
+edition = "2024"
 
 readme = "../README.md"
 description = "gPRC compilation made easy"
@@ -24,16 +24,16 @@ name = "grpc_build"
 [dependencies]
 prost = "0.13"
 anyhow = "1"
-tonic-build = "0.12"
+tonic-build = "0.13"
 prost-build = "0.13"
-clap = { version = "4.0.32", features = ["derive"] }
+clap = { version ="4.5.36", features = ["derive"] }
 paw = "1"
-walkdir = "2.3"
-tempfile = "3.3"
+walkdir = "2.5"
+tempfile = "3.19"
 prost-types = "0.13"
-fs-err = "2.7"
+fs-err = "3.1"
 
 [dev-dependencies]
-tonic = "0.12"
+tonic = "0.13"
 trybuild = "1.0"
 grpc-build-core = { path = "../grpc-build-core" }
