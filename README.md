@@ -78,7 +78,7 @@ fn main() {
     let proto_src_dir = "protos";
     let proto_out_dir = "src/protogen";
 
-    let protos: Vec<_> = crate::base::get_protos(proto_src_dir).collect();
+    let protos: Vec<_> = grpc_build::base::get_protos(proto_src_dir, false).collect();
 
     grpc_build::prepare_out_dir(proto_out_dir).unwrap();
 
