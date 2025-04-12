@@ -45,7 +45,7 @@ pub fn get_protos(input: impl AsRef<Path>, follow_links: bool) -> impl Iterator<
         .into_iter()
         .filter_map(|r| r.map_err(|err| println!("cargo:warning={:?}", err)).ok())
         .filter(|e| e.file_type().is_file())
-        .filter(|e| e.path().extension().map_or(false, |e| e == "proto"))
+        .filter(|e| e.path().extension().is_some_and(|e| e == "proto"))
         .map(|e| e.path().to_path_buf())
 }
 
@@ -56,7 +56,7 @@ pub fn refactor(output: impl AsRef<Path>) -> Result<()> {
     fn inner(output: &Path) -> Result<()> {
         let tree: crate::tree::Tree = fs_err::read_dir(output)?
             .filter_map(|r| r.map_err(|err| println!("cargo:warning={:?}", err)).ok())
-            .filter(|e| e.path().extension().map_or(false, |e| e == "rs"))
+            .filter(|e| e.path().extension().is_some_and(|e| e == "rs"))
             .filter(|e| !e.path().ends_with("mod.rs"))
             .map(|e| e.path())
             .collect();
