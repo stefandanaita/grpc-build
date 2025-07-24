@@ -150,12 +150,12 @@ impl OsStrExt for OsStr {
     /// Adds `add` to the [`OsStr`], returning a new [`OsString`]. If there already exists data in the string,
     /// this puts a `.` separator inbetween
     fn add(&self, add: impl AsRef<OsStr>) -> OsString {
-        let mut _self = self.to_owned();
-        if !_self.is_empty() {
-            _self.push(".");
+        let mut s = self.to_owned();
+        if !s.is_empty() {
+            s.push(".");
         }
-        _self.push(add);
-        _self
+        s.push(add);
+        s
     }
 }
 
@@ -166,7 +166,7 @@ impl Display for Tree {
             if tree.0.is_empty() {
                 write!(f, ";")?;
             } else {
-                write!(f, "{{{}}}", tree)?;
+                write!(f, "{{{tree}}}")?;
             }
         }
         Ok(())
@@ -267,7 +267,10 @@ pub mod hello;
         .map(PathBuf::from)
         .collect();
 
-        let inner_tree = tree.0.get(&PathBuf::from("grpc_build")).unwrap();
+        let inner_tree = tree
+            .0
+            .get(&PathBuf::from("grpc_build"))
+            .expect("grpc_build module should exist");
         let expected = "// Module generated with `grpc_build`
 pub mod client;
 pub mod request;
