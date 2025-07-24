@@ -32,7 +32,7 @@ impl Default for Builder {
 
 impl Builder {
     pub(crate) fn get_out_dir(&self) -> Result<PathBuf, anyhow::Error> {
-        if let Some(out_dir) = &self.out_dir.clone() {
+        if let Some(out_dir) = &self.out_dir {
             return Ok(out_dir.clone());
         }
 
