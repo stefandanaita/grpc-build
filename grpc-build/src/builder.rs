@@ -19,8 +19,8 @@ impl Default for Builder {
     fn default() -> Self {
         Self {
             tonic: tonic_build::configure(),
-            prost: Default::default(),
-            protoc_args: Default::default(),
+            prost: prost_build::Config::default(),
+            protoc_args: Vec::default(),
             out_dir: None,
             force: false,
             default_module_name: None,
@@ -32,15 +32,17 @@ impl Default for Builder {
 
 impl Builder {
     pub(crate) fn get_out_dir(&self) -> Result<PathBuf, anyhow::Error> {
-        self.out_dir.clone().map(Ok).unwrap_or_else(|| {
-            std::env::var_os("OUT_DIR")
-                .ok_or_else(|| anyhow::anyhow!("could not determine $OUT_DIR"))
-                .map(Into::into)
-        })
+        if let Some(out_dir) = &self.out_dir.clone() {
+            return Ok(out_dir.clone());
+        }
+
+        std::env::var_os("OUT_DIR")
+            .ok_or_else(|| anyhow::anyhow!("could not determine $OUT_DIR"))
+            .map(Into::into)
     }
 
     pub fn new() -> Self {
-        Default::default()
+        Self::default()
     }
 
     pub fn force(mut self, force: bool) -> Self {

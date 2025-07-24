@@ -18,8 +18,7 @@ fn impl_fully_qualified_name(ast: &syn::DeriveInput) -> syn::Result<TokenStream>
     // We only annotate structs
     match &ast.data {
         syn::Data::Struct(_) => (),
-        syn::Data::Enum(_) => return Ok(Default::default()),
-        syn::Data::Union(_) => return Ok(Default::default()),
+        syn::Data::Enum(_) | syn::Data::Union(_) => return Ok(TokenStream::default()),
     };
 
     // search for #[name]

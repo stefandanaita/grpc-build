@@ -36,6 +36,7 @@ pub fn prepare_out_dir(out_dir: impl AsRef<Path>) -> Result<()> {
 }
 
 /// Get all the `.proto` files within the provided directory
+#[allow(clippy::filetype_is_file)]
 pub fn get_protos(input: impl AsRef<Path>, follow_links: bool) -> impl Iterator<Item = PathBuf> {
     fn inner(input: &Path, follow_links: bool) -> impl Iterator<Item = PathBuf> {
         // TODO: maybe add this?
@@ -44,9 +45,9 @@ pub fn get_protos(input: impl AsRef<Path>, follow_links: bool) -> impl Iterator<
         WalkDir::new(input)
             .follow_links(follow_links)
             .into_iter()
-            .filter_map(|r| r.map_err(|err| println!("cargo:warning={:?}", err)).ok())
+            .filter_map(|r| r.map_err(|err| println!("cargo:warning={err:?}")).ok())
             .filter(|e| e.file_type().is_file())
-            .filter(|e| e.path().extension().map_or(false, |e| e == "proto"))
+            .filter(|e| e.path().extension().is_some_and(|e| e == "proto"))
             .map(|e| e.path().to_path_buf())
     }
     inner(input.as_ref(), follow_links)
@@ -58,8 +59,8 @@ pub fn get_protos(input: impl AsRef<Path>, follow_links: bool) -> impl Iterator<
 pub fn refactor(output: impl AsRef<Path>) -> Result<()> {
     fn inner(output: &Path) -> Result<()> {
         let tree: crate::tree::Tree = fs_err::read_dir(output)?
-            .filter_map(|r| r.map_err(|err| println!("cargo:warning={:?}", err)).ok())
-            .filter(|e| e.path().extension().map_or(false, |e| e == "rs"))
+            .filter_map(|r| r.map_err(|err| println!("cargo:warning={err:?}")).ok())
+            .filter(|e| e.path().extension().is_some_and(|e| e == "rs"))
             .filter(|e| !e.path().ends_with("mod.rs"))
             .map(|e| e.path())
             .collect();
@@ -100,7 +101,7 @@ mod test {
             std::fs::create_dir_all(path.parent().unwrap()).unwrap();
             std::fs::File::create(path.clone()).unwrap();
             // write file name as its content
-            std::fs::write(path.clone(), format!("// {} contents", file)).unwrap();
+            std::fs::write(path.clone(), format!("// {file} contents")).unwrap();
         }
 
         let expected_file_contents = vec![
@@ -133,12 +134,7 @@ mod test {
             assert!(path.exists());
             let content = std::fs::read_to_string(path).unwrap();
             for line in contents {
-                assert!(
-                    content.contains(line),
-                    "{} does not contain {}",
-                    content,
-                    line
-                );
+                assert!(content.contains(line), "{content} does not contain {line}");
             }
         }
     }
