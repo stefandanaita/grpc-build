@@ -53,7 +53,7 @@ pub fn get_protos(input: impl AsRef<Path>, follow_links: bool) -> impl Iterator<
     inner(input.as_ref(), follow_links)
 }
 
-/// [`tonic_build::Builder::compile`] outputs all the rust files into the output dir all at the top level.
+/// [`tonic_prost_build::Builder::compile`] outputs all the rust files into the output dir all at the top level.
 /// This might not be the most desirable. Running this function converts the file into a more expected directory
 /// structure and generates the expected mod file output
 pub fn refactor(output: impl AsRef<Path>) -> Result<()> {

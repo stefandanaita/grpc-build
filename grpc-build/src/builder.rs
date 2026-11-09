@@ -3,9 +3,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
-/// A mirror of [`tonic_build::Builder`] for our own control
+/// A mirror of [`tonic_prost_build::Builder`] for our own control
 pub struct Builder {
-    pub(crate) tonic: tonic_build::Builder,
+    pub(crate) tonic: tonic_prost_build::Builder,
     pub(crate) prost: prost_build::Config,
     pub(crate) protoc_args: Vec<OsString>,
     pub(crate) out_dir: Option<PathBuf>,
@@ -18,7 +18,7 @@ pub struct Builder {
 impl Default for Builder {
     fn default() -> Self {
         Self {
-            tonic: tonic_build::configure(),
+            tonic: tonic_prost_build::configure(),
             prost: prost_build::Config::default(),
             protoc_args: Vec::default(),
             out_dir: None,
