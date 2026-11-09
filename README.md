@@ -2,7 +2,9 @@
 
 `grpc-build` provides an flexible way to manage protobuf files and generate the gRPC code required by [tonic](https://github.com/hyperium/tonic).
 
-It is built on top of [tonic_build](https://github.com/hyperium/tonic/tree/master/tonic-build) and it extends its functionality by compiling all the protobuf files inside a directory.
+It is built on top of [tonic-prost-build](https://github.com/hyperium/tonic/tree/master/tonic-prost-build) and it extends its functionality by compiling all the protobuf files inside a directory.
+
+The generated code uses tonic's prost codec, so crates compiling it need `tonic` and `tonic-prost` (0.14) as dependencies, along with `prost` and `grpc-build-core`.
 In addition to that, this library adds another feature: full proto name annotation.
 This could be useful in cases where you want use the full name (package + message name) to identify a protobuf message.
 Therefore, for each top-level protobuf message this library adds a method to its generated struct returning its full proto name.
@@ -69,7 +71,7 @@ fn main() {
 }
 ```
 
-If you want to set advanced compilation options (like an additional `#[derive]` for the generated types), use the `build_with_config` function, which exposes the underlying [`tonic_build::Builder`](https://docs.rs/tonic-build/0.5.0/tonic_build/struct.Builder.html).
+If you want to set advanced compilation options (like an additional `#[derive]` for the generated types), use the `build_with_config` function, which exposes the underlying [`tonic_prost_build::Builder`](https://docs.rs/tonic-prost-build/latest/tonic_prost_build/struct.Builder.html).
 
 A more advanced usage is to use the `get_protos` and `refactor` functions yourself. The following example does almost the same as the example above, except you don't get the `NamedMessage` traits auto derived
 
@@ -82,7 +84,7 @@ fn main() {
 
     grpc_build::prepare_out_dir(proto_out_dir).unwrap();
 
-    tonic_build::configure()
+    tonic_prost_build::configure()
         .out_dir(proto_out_dir)
         .build_server(true)
         .build_client(true)
